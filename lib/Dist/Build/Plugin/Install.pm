@@ -12,9 +12,9 @@ sub manipulate_graph {
 	my $graph = $self->builder->graph;
 
 	$graph->commands->add('install', sub {
-		my ($destination, $arguments, $dependencies, $options, $config) = @_;
-		my $paths = ExtUtils::InstallPaths->new(%{$options}, config => $config, dist_name => $self->builder->name);
-		install($paths->install_map, $options->{verbose}, 1, $options->{uninst});
+		my $info = shift;
+		my $paths = ExtUtils::InstallPaths->new($info->options, config => $info->config, dist_name => $self->builder->name);
+		install($paths->install_map, $info->verbose, 1, $info->option('uninst'));
 		return;
 	});
 	$graph->add_phony('install', actions => 'install', dependencies => [ 'build' ]);

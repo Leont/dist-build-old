@@ -15,9 +15,9 @@ sub manipulate_graph {
 	my $graph = $self->builder->graph;
 
 	$graph->commands->add('tap-harness', sub {
-		my ($destination, $arguments, $dependencies, $options) = @_;
-		my $tester = TAP::Harness->new({verbosity => $options->{verbose}, lib => rel2abs(catdir(qw/blib lib/)), color => -t STDOUT});
-		$tester->runtests($dependencies->with_type('testfile'))->has_errors and exit 1;
+		my $info = shift;
+		my $tester = TAP::Harness->new({verbosity => $info->verbose, lib => rel2abs(catdir(qw/blib lib/)), color => -t STDOUT});
+		$tester->runtests($info->dependencies->with_type('testfile'))->has_errors and exit 1;
 	});
 
 	my $iter = File::Next::files({ file_filter => $file_filter, descend_filter => $descend_filter, sort_files => 1 }, 't');

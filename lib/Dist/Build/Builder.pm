@@ -35,7 +35,7 @@ has version => (
 has graph => (
 	is      => 'ro',
 	isa     => 'Build::Graph',
-	default => sub { return Build::Graph->new },
+	default => sub { return Build::Graph->new(info_class => 'Dist::Build::Info') },
 );
 
 has plugins => (
@@ -102,10 +102,10 @@ sub connect_node {
 	my ($self, $name, %options) = @_;
 	my $node = $self->graph->get_node($name) or Carp::croak("No such node '$name'");
 	my $action = sub {
-		my ($self, @args) = @_;
+		my ($self, %args) = @_;
 		Dist::Build::Util::check_dependencies($self->meta_info, @{$_}) for @{ $options{check} };
 		Dist::Build::Util::warn_dependencies($self->meta_info, @{$_}) for @{ $options{warn} };
-		$self->graph->run($name, @args);
+		$self->graph->run($name, %args);
 	};
 	$self->set_action($name, $action);
 	return;
@@ -115,7 +115,7 @@ sub run {
 	my ($self, $name) = @_;
 	$self->finalize;
 	my $action = $self->_get_action($name) or Carp::croak("No such action $name");
-	return $self->$action($self->options, $self->config);
+	return $self->$action(options => $self->options, config => $self->config);
 }
 
 sub plugin_named {

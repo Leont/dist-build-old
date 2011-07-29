@@ -12,9 +12,9 @@ sub manipulate_graph {
 
 	$graph->add_phony('build');
 	$graph->commands->add('copy', sub {
-		my ($destination, $arguments, $dependencies, $options) = @_;
-		my ($source) = $dependencies->with_type('source');
-		copy($source, $destination) or croak "Could not copy: $!";
+		my $info = shift;
+		my ($source) = $info->dependencies->with_type('source');
+		copy($source, $info->name) or croak "Could not copy: $!";
 		return;
 	});
 
