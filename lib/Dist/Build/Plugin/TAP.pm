@@ -3,6 +3,7 @@ package Dist::Build::Plugin::TAP;
 use Any::Moose;
 with qw/Dist::Build::Role::Plugin Dist::Build::Role::GraphManipulator/;
 
+use Carp;
 use File::Next;
 use File::Spec::Functions qw/catdir rel2abs/;
 use TAP::Harness;
@@ -17,7 +18,8 @@ sub manipulate_graph {
 	$graph->commands->add('tap-harness', sub {
 		my $info = shift;
 		my $tester = TAP::Harness->new({verbosity => $info->verbose, lib => rel2abs(catdir(qw/blib lib/)), color => -t STDOUT});
-		$tester->runtests($info->dependencies->with_type('testfile'))->has_errors and exit 1;
+		my $results = $tester->runtests($info->dependencies->with_type('testfile'));
+		croak "Errors in testing.  Cannot continue.\n" if $results->has_errors;
 	});
 
 	my $iter = File::Next::files({ file_filter => $file_filter, descend_filter => $descend_filter, sort_files => 1 }, 't');

@@ -30,6 +30,7 @@ sub Build_PL {
 	my $configurator = $loader->create_configurator($meta);
 	$configurator->write_buildscript(\@args);
 	$configurator->write_mymeta;
+	return;
 }
 
 1;
