@@ -30,8 +30,6 @@ sub manipulate_graph {
 	my $self = shift;
 	$self->graph->add_phony('builddeps', actions => { command => 'checkdeps', arguments => { phases => [qw/runtime build/] } });
 	$self->graph->add_phony('build', dependencies => ['builddeps']);
-
-	$self->builder->connect_node('build');
 	return;
 }
 

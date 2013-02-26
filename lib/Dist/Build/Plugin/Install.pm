@@ -21,7 +21,6 @@ sub configure_commands {
 sub manipulate_graph {
 	my $self = shift;
 	$self->graph->add_phony('install', actions => 'install', dependencies => [ 'build' ]);
-	$self->builder->connect_node('install');
 	return;
 }
 
