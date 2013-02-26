@@ -17,13 +17,13 @@ sub load_meta {
 }
 
 sub Build {
-	my @args = @_;
+	my ($args, $env) = @_;
 	my $meta = load_meta('MYMETA.json', 'MYMETA.yml');
 
-	my $loader = Dist::Build::Loader->new(arguments => \@args, environment => \%ENV);
+	my $loader = Dist::Build::Loader->new(arguments => $args, environment => $env);
 	my $builder = $loader->create_builder($meta);
 
-	my $action = @args ? shift @args : 'build';
+	my $action = @{$args} ? shift @{$args} : 'build';
 	return $builder->run($action);
 }
 

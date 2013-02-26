@@ -10,7 +10,7 @@ my $file_filter = sub { m/ \. p(?:m|od) \z/xms };
 my $descend_filter = sub { $_ ne 'CVS' and $_ ne '.svn' };
 
 sub command_plugins {
-	return 'Sanity';
+	return '-Sanity';
 }
 
 sub manipulate_graph {

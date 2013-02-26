@@ -12,9 +12,6 @@ has plugin_name => (
 );
 
 sub configure {
-	my ($class, $loader) = @_;
-	$loader->add_plugin($class);
-	return;
 }
 
 1;

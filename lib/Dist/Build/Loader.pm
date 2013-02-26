@@ -3,23 +3,15 @@ use strict;
 use warnings;
 
 use Moose;
+
+use Build::Graph;
 use ExtUtils::BuildRC 0.003 qw/read_config/;
+use ExtUtils::Config;
 use ExtUtils::Helpers 0.007 qw/split_like_shell/;
 use File::Slurp qw/read_file/;
 use Getopt::Long qw/GetOptionsFromArray/;
 use JSON 2 qw/decode_json/;
 use Module::Runtime qw/require_module/;
-
-has plugins => (
-	isa => 'ArrayRef[Str]',
-	traits => [ 'Array' ],
-	handles => {
-		add_plugin => 'push',
-		plugins => 'elements',
-	},
-	init_arg => undef,
-	default => sub { [ ] },
-);
 
 has options => (
 	isa => 'ArrayRef[Str]',
@@ -53,53 +45,60 @@ has environment => (
 	},
 );
 
+has info_class => (
+	is      => 'ro',
+	isa     => 'Str',
+	default => 'Dist::Build::Info',
+);
+
 #XXX: hardcoded for now.
-my @modules = qw/Sanity CopyPM TAP Install/;
+my @modules = qw/-Sanity -CopyPM -TAP -Install/;
 sub _modules_to_load {
 	return @modules;
 }
 
-sub _load_modules {
-	my $self = shift;
-	for my $shortname ($self->_modules_to_load) {
-		my $module = "Dist::Build::Plugin::$shortname";
+sub _load_plugins {
+	my ($self, @plugins) = @_;
+	my @modules = map { s/^-/Dist::Build::Plugin::/; $_ } @plugins;
+	for my $module(@modules) {
 		require_module($module);
 		$module->configure($self);
 	}
-	return;
+	return @modules;
 }
 
 sub create_builder {
 	my ($self, $meta) = @_;
-	$self->_load_modules;
+	my $pregraph = decode_json(read_file(q{_build/graph}));
+	my $commandset = Build::Graph::CommandSet->new;
+	for my $command_provider (@{ $pregraph->{commands} }) {
+		my ($module) = $self->_load_plugins($command_provider);
+		$module->new(plugin_name => $command_provider)->configure_commands($commandset);
+	}
 	my ($opt, $config) = $self->_parse_arguments;
+	my $graph = Build::Graph->new(commands => $commandset, info_class => $self->info_class);
+	$graph->load_from_hashref($pregraph->{graph});
 	require Dist::Build::Builder;
-	my $builder = Dist::Build::Builder->new(
+	return Dist::Build::Builder->new(
 		meta_info => $meta,
 		options   => $opt,
 		config    => $config,
+		graph     => $graph,
 	);
-	for my $plugin ($self->plugins) {
-		my $instance = $plugin->new(plugin_name => $plugin);
-		$builder->add_plugin($instance);
-	}
-	return $builder;
 }
 
 sub create_configurator {
 	my ($self, $meta) = @_;
-	$self->_load_modules;
+	my @plugins = $self->_load_plugins($self->_modules_to_load);
 	my ($opt, $config) = $self->_parse_arguments(1);
 	require Dist::Build::Configurator;
-	my $configurator = Dist::Build::Configurator->new(
+	return Dist::Build::Configurator->new(
 		meta_info => $meta,
 		options   => $opt,
 		config    => $config,
+		plugins   => \@plugins,
+		info_class => $self->info_class,
 	);
-	for my $plugin ($self->plugins) {
-		$configurator->add_plugin($plugin);
-	}
-	return $configurator;
 }
 
 sub _parse_arguments {
