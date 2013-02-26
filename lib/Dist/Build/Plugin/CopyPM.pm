@@ -3,7 +3,7 @@ package Dist::Build::Plugin::CopyPM;
 use Moose;
 with qw/Dist::Build::Role::GraphManipulator/;
 
-use File::Spec::Functions;
+use File::Spec::Functions qw/catfile/;
 use File::Next;
 
 my $file_filter = sub { m/ \. p(?:m|od) \z/xms };

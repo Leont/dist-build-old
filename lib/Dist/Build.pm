@@ -5,7 +5,7 @@ use warnings;
 use Exporter 5.57 'import';
 our @EXPORT = qw/Build Build_PL/;
 
-use Carp qw/croak carp/;
+use Carp qw/croak/;
 
 use CPAN::Meta;
 use Dist::Build::Loader;

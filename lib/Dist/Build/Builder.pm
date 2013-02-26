@@ -4,7 +4,6 @@ use Moose;
 
 use Build::Graph;
 use Dist::Build::Role::Plugin;
-use Carp;
 
 has meta_info => (
 	is       => 'ro',

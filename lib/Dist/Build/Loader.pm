@@ -1,6 +1,4 @@
 package Dist::Build::Loader;
-use strict;
-use warnings;
 
 use Moose;
 

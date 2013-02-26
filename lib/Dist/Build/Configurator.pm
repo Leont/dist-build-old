@@ -3,8 +3,8 @@ package Dist::Build::Configurator;
 use Moose;
 
 use Build::Graph;
-use ExtUtils::Helpers 0.007 qw/make_executable split_like_shell build_script/;
-use File::Slurp qw/read_file write_file/;
+use ExtUtils::Helpers 0.007 qw/make_executable/;
+use File::Slurp qw/write_file/;
 use JSON 2 qw/encode_json/;
 use List::MoreUtils qw/uniq/;
 
