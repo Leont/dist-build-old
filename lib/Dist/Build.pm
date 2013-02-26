@@ -8,7 +8,7 @@ our @EXPORT = qw/Build Build_PL/;
 use Carp;
 
 use Dist::Build::Loader;
-use Dist::Build::Util qw/check_dependencies load_meta/;
+use Dist::Build::Util qw/load_meta/;
 
 sub Build {
 	my @args = @_;

@@ -9,6 +9,12 @@ has config => (
 	required => 1,
 );
 
+has meta_info => (
+	is => 'ro',
+	isa => 'CPAN::Meta',
+	required => 1,
+);
+
 has options => (
 	isa => 'HashRef',
 	traits => ['Hash'],

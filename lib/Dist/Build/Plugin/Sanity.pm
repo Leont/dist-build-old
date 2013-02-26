@@ -4,10 +4,19 @@ use Moose;
 with qw/Dist::Build::Role::Plugin Dist::Build::Role::Command Dist::Build::Role::GraphManipulator/;
 
 use Carp;
+use CPAN::Meta::Check qw/verify_dependencies/;
 use File::Copy 'copy';
 
 sub configure_commands {
 	my $self = shift;
+	$self->graph->commands->add('checkdeps', sub {
+		my $info = shift;
+		my $phases = $info->arguments->{phases};
+		my @croak = verify_dependencies($info->meta_info, $phases, 'requires');
+		croak join "\n", @croak if @croak;
+		my @carp = verify_dependencies($info->meta_info, $phases, 'recommends');
+		carp join "\n", @carp if @carp;
+	});
 	$self->graph->commands->add('copy', sub {
 		my $info = shift;
 		my $source = $info->arguments->{source};
@@ -19,9 +28,10 @@ sub configure_commands {
 
 sub manipulate_graph {
 	my $self = shift;
-	$self->graph->add_phony('build');
+	$self->graph->add_phony('builddeps', actions => { command => 'checkdeps', arguments => { phases => [qw/runtime build/] } });
+	$self->graph->add_phony('build', dependencies => ['builddeps']);
 
-	$self->builder->connect_node('build', check => [ [ qw/build requires/ ] ], warn => [ [ qw/build recommends/ ] ]);
+	$self->builder->connect_node('build');
 	return;
 }
 

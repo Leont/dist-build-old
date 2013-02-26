@@ -106,8 +106,6 @@ sub connect_node {
 	my $node = $self->graph->get_node($name) or Carp::croak("No such node '$name'");
 	my $action = sub {
 		my ($self, %args) = @_;
-		Dist::Build::Util::check_dependencies($self->meta_info, @{$_}) for @{ $options{check} };
-		Dist::Build::Util::warn_dependencies($self->meta_info, @{$_}) for @{ $options{warn} };
 		$self->graph->run($name, %args);
 	};
 	$self->set_action($name, $action);
@@ -118,7 +116,7 @@ sub run {
 	my ($self, $name) = @_;
 	$self->finalize;
 	my $action = $self->_get_action($name) or Carp::croak("No such action $name");
-	return $self->$action(options => $self->options, config => $self->config);
+	return $self->$action(options => $self->options, config => $self->config, meta_info => $self->meta_info);
 }
 
 sub plugin_named {
