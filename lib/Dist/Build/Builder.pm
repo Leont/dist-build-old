@@ -132,6 +132,4 @@ sub plugins_with {
 
 1;
 
-__END__
-
 # ABSTRACT: The actual module builder of Dist-Build

@@ -48,8 +48,8 @@ sub write_buildscript {
 
 	printf "Creating new 'Build' script for '%s' version '%s'\n", $meta->name, $meta->version;
 	my $dir = $meta->name eq 'Dist-Build' ? 'lib' : 'inc';
-	write_file(build_script(), "#!perl\nuse lib '$dir';\nuse Dist::Build;\nBuild(\@ARGV);\n");
-	make_executable(build_script());
+	write_file('Build', "#!perl\nuse lib '$dir';\nuse Dist::Build;\nBuild(\@ARGV);\n");
+	make_executable('Build');
 
 	mkdir '_build' if not -d '_build';
 	write_file(qw{_build/params}, encode_json($arguments));
@@ -65,7 +65,5 @@ sub write_mymeta {
 }
 
 1;
-
-__END__
 
 # ABSTRACT: The Dist-Build configuration stage

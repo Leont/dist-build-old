@@ -26,4 +26,4 @@ sub verbose {
 
 1;
 
-# ABSTRACT: node info
+# ABSTRACT: Node info

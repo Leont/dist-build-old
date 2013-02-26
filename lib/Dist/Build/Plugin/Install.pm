@@ -30,6 +30,4 @@ after 'configure' => sub {
 
 1;
 
-__END__
-
-# ABSTRACT: a Build.PL compatible installing module
+# ABSTRACT: A Build.PL compatible installing plugin

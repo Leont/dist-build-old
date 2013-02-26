@@ -38,7 +38,5 @@ sub manipulate_graph {
 
 1;
 
-__END__
-
 # ABSTRACT: A TAP consuming testing plugin
 

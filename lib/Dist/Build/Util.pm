@@ -53,6 +53,4 @@ sub load_meta {
 
 1;
 
-__END__
-
 # ABSTRACT: Various utility functions for Dist::Build

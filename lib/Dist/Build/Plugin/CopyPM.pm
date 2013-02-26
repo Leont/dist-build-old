@@ -30,6 +30,4 @@ sub manipulate_graph {
 
 1;
 
-__END__
-
-# ABSTRACT: plugin for copying Perl modules from lib to blib
+# ABSTRACT: Plugin for copying Perl modules from lib to blib

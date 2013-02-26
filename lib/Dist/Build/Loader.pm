@@ -118,6 +118,4 @@ sub _parse_arguments {
 
 1;
 
-__END__
-
-#ABSTRACT: configuration and plugin loader
+#ABSTRACT: Configuration and plugin loader

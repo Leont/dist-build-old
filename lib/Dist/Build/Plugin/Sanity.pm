@@ -24,6 +24,4 @@ sub manipulate_graph {
 
 1;
 
-__END__
-
 # ABSTRACT: Plugin implemented the bare neceseties of any module build process

@@ -29,6 +29,4 @@ sub configure {
 
 1;
 
-__END__
-
 # ABSTRACT: Plugin role
