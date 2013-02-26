@@ -8,8 +8,8 @@ use CPAN::Meta::Check qw/verify_dependencies/;
 use File::Copy 'copy';
 
 sub configure_commands {
-	my $self = shift;
-	$self->graph->commands->add('checkdeps', sub {
+	my ($self, $commands) = @_;
+	$commands->add('checkdeps', sub {
 		my $info = shift;
 		my $phases = $info->arguments->{phases};
 		my @croak = verify_dependencies($info->meta_info, $phases, 'requires');
@@ -17,7 +17,7 @@ sub configure_commands {
 		my @carp = verify_dependencies($info->meta_info, $phases, 'recommends');
 		carp join "\n", @carp if @carp;
 	});
-	$self->graph->commands->add('copy', sub {
+	$commands->add('copy', sub {
 		my $info = shift;
 		my $source = $info->arguments->{source};
 		copy($source, $info->name) or croak "Could not copy: $!";
@@ -27,9 +27,9 @@ sub configure_commands {
 }
 
 sub manipulate_graph {
-	my $self = shift;
-	$self->graph->add_phony('builddeps', actions => { command => 'checkdeps', arguments => { phases => [qw/runtime build/] } });
-	$self->graph->add_phony('build', dependencies => ['builddeps']);
+	my ($self, $graph) = @_;
+	$graph->add_phony('builddeps', actions => { command => 'checkdeps', arguments => { phases => [qw/runtime build/] } });
+	$graph->add_phony('build', dependencies => ['builddeps']);
 	return;
 }
 

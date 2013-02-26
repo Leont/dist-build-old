@@ -82,10 +82,10 @@ sub finalize {
 	return if $self->finalized;
 
 	for my $commandset ($self->plugins_with(-Command)) {
-		$commandset->configure_commands;
+		$commandset->configure_commands($self->graph->commands);
 	}
 	for my $grapher ($self->plugins_with(-GraphManipulator)) {
-		$grapher->manipulate_graph;
+		$grapher->manipulate_graph($self->graph);
 	}
 	return;
 }

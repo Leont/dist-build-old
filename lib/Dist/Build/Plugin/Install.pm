@@ -8,10 +8,10 @@ use ExtUtils::Install qw/install/;
 use ExtUtils::InstallPaths;
 
 sub configure_commands {
-	my $self = shift;
-	$self->graph->commands->add('install', sub {
+	my ($self, $commands) = @_;
+	$commands->add('install', sub {
 		my $info = shift;
-		my $paths = ExtUtils::InstallPaths->new($info->options, config => $info->config, dist_name => $self->builder->name);
+		my $paths = ExtUtils::InstallPaths->new($info->options, config => $info->config, dist_name => $info->meta_info->name);
 		install($paths->install_map, $info->verbose, 1, $info->option('uninst'));
 		return;
 	});
@@ -19,8 +19,8 @@ sub configure_commands {
 }
 
 sub manipulate_graph {
-	my $self = shift;
-	$self->graph->add_phony('install', actions => 'install', dependencies => [ 'build' ]);
+	my ($self, $graph) = @_;
+	$graph->add_phony('install', actions => 'install', dependencies => [ 'build' ]);
 	return;
 }
 

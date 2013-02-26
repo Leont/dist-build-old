@@ -11,13 +11,6 @@ has plugin_name => (
 	required => 1,
 );
 
-has builder => (
-	is       => 'ro',
-	isa      => 'Dist::Build::Builder',
-	required => 1,
-	weak_ref => 1,
-);
-
 sub configure {
 	my ($class, $loader) = @_;
 	$loader->add_plugin($class);

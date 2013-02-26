@@ -80,7 +80,7 @@ sub create_builder {
 		config    => $config,
 	);
 	for my $plugin ($self->plugins) {
-		my $instance = $plugin->new(plugin_name => $plugin, builder => $builder);
+		my $instance = $plugin->new(plugin_name => $plugin);
 		$builder->add_plugin($instance);
 	}
 	return $builder;

@@ -14,8 +14,7 @@ sub command_plugins {
 }
 
 sub manipulate_graph {
-	my $self  = shift;
-	my $graph = $self->builder->graph;
+	my ($self, $graph) = @_;
 
 	my $iter = File::Next::files({ file_filter => $file_filter, descend_filter => $descend_filter }, 'lib');
 	my @destinations;

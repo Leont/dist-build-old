@@ -12,8 +12,8 @@ my $file_filter = sub { m/ \.t \z/xms };
 my $descend_filter = sub { $_ ne 'CVS' and $_ ne '.svn' };
 
 sub configure_commands {
-	my $self = shift;
-	$self->graph->commands->add('tap-harness', sub {
+	my ($self, $commands) = @_;
+	$commands->add('tap-harness', sub {
 		my $info = shift;
 		my $tester = TAP::Harness->new({verbosity => $info->verbose, lib => rel2abs(catdir(qw/blib lib/)), color => -t STDOUT});
 		my $results = $tester->runtests(@{ $info->arguments->{files} });
@@ -23,8 +23,7 @@ sub configure_commands {
 }
 
 sub manipulate_graph {
-	my $self  = shift;
-	my $graph = $self->graph;
+	my ($self, $graph) = @_;
 
 	my $iter = File::Next::files({ file_filter => $file_filter, descend_filter => $descend_filter, sort_files => 1 }, 't');
 	my @files;
