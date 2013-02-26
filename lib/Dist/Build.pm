@@ -5,10 +5,16 @@ use warnings;
 use Exporter 5.57 'import';
 our @EXPORT = qw/Build Build_PL/;
 
-use Carp;
+use Carp qw/croak carp/;
 
+use CPAN::Meta;
 use Dist::Build::Loader;
-use Dist::Build::Util qw/load_meta/;
+
+sub load_meta {
+	my @files = @_;
+	my ($metafile) = grep { -e $_ } @files or croak "No META information provided\n";
+	return CPAN::Meta->load_file($metafile);
+}
 
 sub Build {
 	my @args = @_;
