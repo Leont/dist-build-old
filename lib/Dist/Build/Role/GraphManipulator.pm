@@ -1,6 +1,6 @@
 package Dist::Build::Role::GraphManipulator;
 
-use Any::Moose 'Role';
+use Moose::Role;
 
 requires 'manipulate_graph';
 

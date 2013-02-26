@@ -1,6 +1,6 @@
 package Dist::Build::Info;
 
-use Any::Moose;
+use Moose;
 extends 'Build::Graph::Info';
 
 has config => (

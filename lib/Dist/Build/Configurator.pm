@@ -1,6 +1,6 @@
 package Dist::Build::Configurator;
 
-use Any::Moose;
+use Moose;
 
 use ExtUtils::Helpers 0.007 qw/make_executable split_like_shell build_script/;
 use File::Slurp qw/read_file write_file/;

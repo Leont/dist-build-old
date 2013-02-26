@@ -1,6 +1,7 @@
 package Dist::Build::Role::Plugin;
 
-use Any::Moose 'Role', '::Util::TypeConstraints';
+use Moose::Role;
+use Moose::Util::TypeConstraints;
 
 role_type 'Dist::Build::Role::Plugin';
 

@@ -1,6 +1,6 @@
 package Dist::Build::Plugin::Install;
 
-use Any::Moose;
+use Moose;
 with qw/Dist::Build::Role::Plugin Dist::Build::Role::GraphManipulator/;
 
 use File::Spec::Functions qw//;

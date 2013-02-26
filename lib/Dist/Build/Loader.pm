@@ -2,7 +2,7 @@ package Dist::Build::Loader;
 use strict;
 use warnings;
 
-use Any::Moose;
+use Moose;
 use ExtUtils::BuildRC 0.003 qw/read_config/;
 use ExtUtils::Helpers 0.007 qw/split_like_shell/;
 use File::Slurp qw/read_file/;

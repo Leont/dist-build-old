@@ -1,6 +1,6 @@
 package Dist::Build::Builder;
 
-use Any::Moose;
+use Moose;
 
 use Build::Graph;
 use Dist::Build::Role::Plugin;
