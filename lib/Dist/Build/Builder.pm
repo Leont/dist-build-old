@@ -81,6 +81,9 @@ sub finalize {
 	my $self = shift;
 	return if $self->finalized;
 
+	for my $commandset ($self->plugins_with(-Command)) {
+		$commandset->configure_commands;
+	}
 	for my $grapher ($self->plugins_with(-GraphManipulator)) {
 		$grapher->manipulate_graph;
 	}

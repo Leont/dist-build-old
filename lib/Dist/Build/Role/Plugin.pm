@@ -18,9 +18,6 @@ has builder => (
 	weak_ref => 1,
 );
 
-sub mvp_multivalue_args { }
-sub mvp_aliases { return {} }
-
 sub configure {
 	my ($class, $loader) = @_;
 	$loader->add_plugin($class);

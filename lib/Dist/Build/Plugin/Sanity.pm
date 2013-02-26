@@ -1,22 +1,25 @@
 package Dist::Build::Plugin::Sanity;
 
 use Moose;
-with qw/Dist::Build::Role::Plugin Dist::Build::Role::GraphManipulator/;
+with qw/Dist::Build::Role::Plugin Dist::Build::Role::Command Dist::Build::Role::GraphManipulator/;
 
 use Carp;
 use File::Copy 'copy';
 
-sub manipulate_graph {
+sub configure_commands {
 	my $self = shift;
-	my $graph = $self->builder->graph;
-
-	$graph->add_phony('build');
-	$graph->commands->add('copy', sub {
+	$self->graph->commands->add('copy', sub {
 		my $info = shift;
-		my ($source) = $info->dependencies->with_type('source');
+		my $source = $info->arguments->{source};
 		copy($source, $info->name) or croak "Could not copy: $!";
 		return;
 	});
+	return;
+}
+
+sub manipulate_graph {
+	my $self = shift;
+	$self->graph->add_phony('build');
 
 	$self->builder->connect_node('build', check => [ [ qw/build requires/ ] ], warn => [ [ qw/build recommends/ ] ]);
 	return;

@@ -1,25 +1,27 @@
 package Dist::Build::Plugin::Install;
 
 use Moose;
-with qw/Dist::Build::Role::Plugin Dist::Build::Role::GraphManipulator/;
+with qw/Dist::Build::Role::Command Dist::Build::Role::GraphManipulator/;
 
 use File::Spec::Functions qw//;
 use ExtUtils::Install qw/install/;
 use ExtUtils::InstallPaths;
 
-sub manipulate_graph {
-	my $self  = shift;
-	my $graph = $self->builder->graph;
-
-	$graph->commands->add('install', sub {
+sub configure_commands {
+	my $self = shift;
+	$self->graph->commands->add('install', sub {
 		my $info = shift;
 		my $paths = ExtUtils::InstallPaths->new($info->options, config => $info->config, dist_name => $self->builder->name);
 		install($paths->install_map, $info->verbose, 1, $info->option('uninst'));
 		return;
 	});
-	$graph->add_phony('install', actions => 'install', dependencies => [ 'build' ]);
-	$self->builder->connect_node('install');
+	return;
+}
 
+sub manipulate_graph {
+	my $self = shift;
+	$self->graph->add_phony('install', actions => 'install', dependencies => [ 'build' ]);
+	$self->builder->connect_node('install');
 	return;
 }
 

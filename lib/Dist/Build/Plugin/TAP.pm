@@ -1,7 +1,7 @@
 package Dist::Build::Plugin::TAP;
 
 use Moose;
-with qw/Dist::Build::Role::Plugin Dist::Build::Role::GraphManipulator/;
+with qw/Dist::Build::Role::Command Dist::Build::Role::GraphManipulator/;
 
 use Carp;
 use File::Next;
@@ -11,16 +11,20 @@ use TAP::Harness;
 my $file_filter = sub { m/ \.t \z/xms };
 my $descend_filter = sub { $_ ne 'CVS' and $_ ne '.svn' };
 
-sub manipulate_graph {
-	my $self  = shift;
-	my $graph = $self->builder->graph;
-
-	$graph->commands->add('tap-harness', sub {
+sub configure_commands {
+	my $self = shift;
+	$self->graph->commands->add('tap-harness', sub {
 		my $info = shift;
 		my $tester = TAP::Harness->new({verbosity => $info->verbose, lib => rel2abs(catdir(qw/blib lib/)), color => -t STDOUT});
-		my $results = $tester->runtests($info->dependencies->with_type('testfile'));
+		my $results = $tester->runtests(@{ $info->arguments->{files} });
 		croak "Errors in testing.  Cannot continue.\n" if $results->has_errors;
 	});
+	return;
+}
+
+sub manipulate_graph {
+	my $self  = shift;
+	my $graph = $self->graph;
 
 	my $iter = File::Next::files({ file_filter => $file_filter, descend_filter => $descend_filter, sort_files => 1 }, 't');
 	my @files;
@@ -29,8 +33,8 @@ sub manipulate_graph {
 		$graph->add_file($testfile);
 	}
 
-	$graph->add_phony('testbuild', dependencies => ['build'] );
-	$graph->add_phony('test', actions => 'tap-harness', dependencies => { testbuild => undef, map { $_ => 'testfile' } @files });
+	$graph->add_phony('testbuild', dependencies => ['build',  @files] );
+	$graph->add_phony('test', actions => { command => 'tap-harness', arguments => { files => \@files } }, dependencies => [ 'testbuild' ]);
 
 	$self->builder->connect_node('test');
 	return;
