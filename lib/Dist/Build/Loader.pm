@@ -8,7 +8,7 @@ use ExtUtils::Helpers 0.007 qw/split_like_shell/;
 use File::Slurp qw/read_file/;
 use Getopt::Long qw/GetOptionsFromArray/;
 use JSON 2 qw/decode_json/;
-use Module::Load;
+use Module::Runtime qw/require_module/;
 
 has plugins => (
 	isa => 'ArrayRef[Str]',
@@ -63,7 +63,7 @@ sub _load_modules {
 	my $self = shift;
 	for my $shortname ($self->_modules_to_load) {
 		my $module = "Dist::Build::Plugin::$shortname";
-		load($module);
+		require_module($module);
 		$module->configure($self);
 	}
 	return;
