@@ -8,7 +8,7 @@ requires 'configure_commands';
 
 sub command_plugins {
 	my $self = shift;
-	return $self;
+	return ref $self;
 }
 
 1;

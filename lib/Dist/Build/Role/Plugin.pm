@@ -5,7 +5,7 @@ use Moose::Util::TypeConstraints;
 
 role_type 'Dist::Build::Role::Plugin';
 
-has plugin_name => (
+has name => (
 	is       => 'ro',
 	isa      => 'Str',
 	required => 1,

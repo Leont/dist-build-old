@@ -62,7 +62,7 @@ sub _load_plugins {
 		require_module($module);
 		$module->configure($self);
 	}
-	return @modules;
+	return wantarray ? @modules : $modules[0];
 }
 
 sub create_builder {
@@ -71,7 +71,7 @@ sub create_builder {
 	my $commandset = Build::Graph::CommandSet->new;
 	for my $command_provider (@{ $pregraph->{commands} }) {
 		my ($module) = $self->_load_plugins($command_provider);
-		$module->new(plugin_name => $command_provider)->configure_commands($commandset);
+		$module->new(name => $command_provider)->configure_commands($commandset);
 	}
 	my ($opt, $config) = $self->_parse_arguments;
 	my $graph = Build::Graph->new(commands => $commandset, info_class => $self->info_class);
@@ -87,7 +87,7 @@ sub create_builder {
 
 sub create_configurator {
 	my ($self, $meta) = @_;
-	my @plugins = $self->_load_plugins($self->_modules_to_load);
+	my @plugins = map { $self->_load_plugins($_)->new(name => $_) } $self->_modules_to_load;
 	my ($opt, $config) = $self->_parse_arguments(1);
 	require Dist::Build::Configurator;
 	return Dist::Build::Configurator->new(
