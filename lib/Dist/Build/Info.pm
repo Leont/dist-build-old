@@ -4,22 +4,22 @@ use Moose;
 extends 'Build::Graph::Info';
 
 has config => (
-	is => 'ro',
-	isa => 'ExtUtils::Config',
+	is       => 'ro',
+	isa      => 'ExtUtils::Config',
 	required => 1,
 );
 
 has meta_info => (
-	is => 'ro',
-	isa => 'CPAN::Meta',
+	is       => 'ro',
+	isa      => 'CPAN::Meta',
 	required => 1,
 );
 
 has options => (
-	isa => 'HashRef',
-	traits => ['Hash'],
+	isa     => 'HashRef',
+	traits  => ['Hash'],
 	handles => {
-		option => 'get',
+		option     => 'get',
 		has_option => 'exists',
 		options    => 'elements',
 	},

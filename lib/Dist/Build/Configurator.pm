@@ -35,10 +35,10 @@ has version => (
 );
 
 has plugins => (
-	isa      => 'ArrayRef[Dist::Build::Role::Plugin]',
-	traits   => ['Array'],
-	default  => sub { [] },
-	handles  => {
+	isa     => 'ArrayRef[Dist::Build::Role::Plugin]',
+	traits  => ['Array'],
+	default => sub { [] },
+	handles => {
 		plugins        => 'elements',
 		search_plugins => 'grep',
 	},
@@ -47,7 +47,7 @@ has plugins => (
 sub plugins_with {
 	my ($self, $role) = @_;
 
-	$role =~ s/ ^ - /Dist::Build::Role::/x;
+	$role =~ s/ ^ - /Dist::Build::Role::/xms;
 	return $self->search_plugins(sub { $_->does($role) });
 }
 
@@ -92,7 +92,7 @@ sub run {
 	mkdir '_build' if not -d '_build';
 	write_file(qw{_build/params}, encode_json($arguments));
 	my @dependencies = uniq(map { $_->dependencies } $self->plugins_with(-Graph::Manipulator));
-	write_file(qw{_build/graph}, encode_json({dependencies => \@dependencies, graph => $self->graph->nodes_to_hashref }));
+	write_file(qw{_build/graph}, encode_json({ dependencies => \@dependencies, graph => $self->graph->nodes_to_hashref }));
 
 	$self->meta_info->save('MYMETA.json');
 	$self->meta_info->save('MYMETA.yml', { version => 1.4 });

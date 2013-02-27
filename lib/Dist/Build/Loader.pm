@@ -12,15 +12,13 @@ use JSON 2 qw/decode_json/;
 use Module::Runtime qw/require_module/;
 
 has options => (
-	isa => 'ArrayRef[Str]',
-	traits => [ 'Array' ],
-	handles => {
+	isa      => 'ArrayRef[Str]',
+	traits   => ['Array'],
+	init_arg => undef,
+	default  => sub { [qw/config=s% verbose:1/] },
+	handles  => {
 		add_options => 'push',
 		options     => 'elements',
-	},
-	init_arg => undef,
-	default => sub {
-		[ qw/config=s% verbose:1/ ]
 	},
 );
 
@@ -32,13 +30,14 @@ has info_class => (
 
 #XXX: hardcoded for now.
 my @modules = qw/-Sanity -CopyPM -TAP -Install/;
+
 sub _modules_to_load {
 	return @modules;
 }
 
 sub _load_plugin {
 	my ($self, $plugin) = @_;
-	(my $module = $plugin) =~ s/ ^ - /Dist::Build::Plugin::/x;
+	(my $module = $plugin) =~ s/ ^ - /Dist::Build::Plugin::/xms;
 	require_module($module);
 	$module->configure($self);
 	return $module;
@@ -46,7 +45,7 @@ sub _load_plugin {
 
 sub create_builder {
 	my ($self, $meta, $args, $env) = @_;
-	my $pregraph = decode_json(read_file(q{_build/graph}));
+	my $pregraph   = decode_json(read_file(q{_build/graph}));
 	my $commandset = Build::Graph::CommandSet->new;
 	for my $dependency (@{ $pregraph->{dependencies} }) {
 		my $module = $self->_load_plugin($dependency);
@@ -72,20 +71,20 @@ sub create_configurator {
 	my @plugins = map { $self->_load_plugin($_)->new(name => $_) } $self->_modules_to_load;
 	require Dist::Build::Configurator;
 	return Dist::Build::Configurator->new(
-		meta_info => $meta,
-		plugins   => \@plugins,
+		meta_info  => $meta,
+		plugins    => \@plugins,
 		info_class => $self->info_class,
 	);
 }
 
 sub _parse_arguments {
 	my ($self, $args, $env) = @_;
-	my $bpl    = decode_json(read_file('_build/params'));
-	my $action = @{$args} && $args->[0] =~ / \A \w+ \z /x ? shift @{$args} : 'build';
+	my $bpl     = decode_json(read_file('_build/params'));
+	my $action  = @{$args} && $args->[0] =~ / \A \w+ \z /xms ? shift @{$args} : 'build';
 	my $rc_opts = read_config();
-	my @env = defined $env->{PERL_MB_OPT} ? split_like_shell($env->{PERL_MB_OPT}) : ();
-	my @all_arguments = map { @{$_} } grep { defined } $rc_opts->{'*'}, $bpl, $rc_opts->{$action}, \@env, $args;
-	GetOptionsFromArray(\@all_arguments, \my %opt, $self->options);
+	my @env     = defined $env->{PERL_MB_OPT} ? split_like_shell($env->{PERL_MB_OPT}) : ();
+	my @all     = map { @{$_} } grep { defined } $rc_opts->{'*'}, $bpl, $rc_opts->{$action}, \@env, $args;
+	GetOptionsFromArray(\@all, \my %opt, $self->options);
 	my $config = ExtUtils::Config->new(delete $opt{config});
 	return ($action, \%opt, $config);
 }
