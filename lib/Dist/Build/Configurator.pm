@@ -71,10 +71,10 @@ has graph => (
 
 sub load_graph_plugins {
 	my ($self, $graph) = @_;
-	for my $commandset ($self->plugins_with(-Command)) {
+	for my $commandset ($self->plugins_with(-Graph::Command)) {
 		$commandset->configure_commands($graph->commands);
 	}
-	for my $grapher ($self->plugins_with(-GraphManipulator)) {
+	for my $grapher ($self->plugins_with(-Graph::Manipulator)) {
 		$grapher->manipulate_graph($graph);
 	}
 	return;
@@ -91,8 +91,8 @@ sub write_buildscript {
 
 	mkdir '_build' if not -d '_build';
 	write_file(qw{_build/params}, encode_json($arguments));
-	my @commands = uniq(map { $_->command_plugins } $self->plugins_with(-GraphManipulator));
-	write_file(qw{_build/graph}, encode_json({commands => \@commands, graph => $self->graph->nodes_to_hashref }));
+	my @dependencies = uniq(map { $_->dependencies } $self->plugins_with(-Graph::Manipulator));
+	write_file(qw{_build/graph}, encode_json({dependencies => \@dependencies, graph => $self->graph->nodes_to_hashref }));
 	return;
 }
 

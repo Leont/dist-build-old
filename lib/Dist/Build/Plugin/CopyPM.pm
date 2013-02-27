@@ -1,7 +1,7 @@
 package Dist::Build::Plugin::CopyPM;
 
 use Moose;
-with qw/Dist::Build::Role::GraphManipulator/;
+with qw/Dist::Build::Role::Graph::Manipulator/;
 
 use File::Spec::Functions qw/catfile/;
 use File::Next;
@@ -9,8 +9,8 @@ use File::Next;
 my $file_filter = sub { m/ \. p(?:m|od) \z/xms };
 my $descend_filter = sub { $_ ne 'CVS' and $_ ne '.svn' };
 
-sub command_plugins {
-	return '-Sanity';
+sub dependencies {
+	return 'Dist::Build::Plugin::Sanity';
 }
 
 sub manipulate_graph {

@@ -1,7 +1,7 @@
 package Dist::Build::Plugin::TAP;
 
 use Moose;
-with qw/Dist::Build::Role::Command Dist::Build::Role::GraphManipulator/;
+with qw/Dist::Build::Role::Graph::Command Dist::Build::Role::Graph::Manipulator/;
 
 use Carp;
 use File::Next;

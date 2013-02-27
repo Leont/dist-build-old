@@ -55,23 +55,22 @@ sub _modules_to_load {
 	return @modules;
 }
 
-sub _load_plugins {
-	my ($self, @plugins) = @_;
-	my @modules = map { s/^-/Dist::Build::Plugin::/; $_ } @plugins;
-	for my $module(@modules) {
-		require_module($module);
-		$module->configure($self);
-	}
-	return wantarray ? @modules : $modules[0];
+sub _load_plugin {
+	my ($self, $plugin) = @_;
+	(my $module = $plugin) =~ s/ ^ - /Dist::Build::Plugin::/x;
+	require_module($module);
+	$module->configure($self);
+	return $module;
 }
 
 sub create_builder {
 	my ($self, $meta) = @_;
 	my $pregraph = decode_json(read_file(q{_build/graph}));
 	my $commandset = Build::Graph::CommandSet->new;
-	for my $command_provider (@{ $pregraph->{commands} }) {
-		my ($module) = $self->_load_plugins($command_provider);
-		$module->new(name => $command_provider)->configure_commands($commandset);
+	for my $dependency (@{ $pregraph->{dependencies} }) {
+		my $module = $self->_load_plugin($dependency);
+		my $plugin = $module->new(name => $dependency);
+		$plugin->configure_commands($commandset) if $plugin->does('Build::Graph::Role::Command');
 	}
 	my ($opt, $config) = $self->_parse_arguments;
 	my $graph = Build::Graph->new(commands => $commandset, info_class => $self->info_class);
@@ -87,7 +86,7 @@ sub create_builder {
 
 sub create_configurator {
 	my ($self, $meta) = @_;
-	my @plugins = map { $self->_load_plugins($_)->new(name => $_) } $self->_modules_to_load;
+	my @plugins = map { $self->_load_plugin($_)->new(name => $_) } $self->_modules_to_load;
 	my ($opt, $config) = $self->_parse_arguments(1);
 	require Dist::Build::Configurator;
 	return Dist::Build::Configurator->new(

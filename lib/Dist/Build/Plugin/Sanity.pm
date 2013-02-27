@@ -1,7 +1,7 @@
 package Dist::Build::Plugin::Sanity;
 
 use Moose;
-with qw/Dist::Build::Role::Plugin Dist::Build::Role::Command Dist::Build::Role::GraphManipulator/;
+with qw/Dist::Build::Role::Graph::Command Dist::Build::Role::Graph::Manipulator/;
 
 use Carp;
 use CPAN::Meta::Check qw/verify_dependencies/;
