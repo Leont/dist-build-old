@@ -20,11 +20,7 @@ sub Build {
 	my ($args, $env) = @_;
 	my $meta = load_meta('MYMETA.json', 'MYMETA.yml');
 
-	my $loader = Dist::Build::Loader->new(arguments => $args, environment => $env);
-	my $builder = $loader->create_builder($meta);
-
-	my $action = @{$args} ? shift @{$args} : 'build';
-	return $builder->run($action);
+	return Dist::Build::Loader->new->create_builder($meta, $args, $env)->run;
 }
 
 sub Build_PL {
@@ -32,11 +28,7 @@ sub Build_PL {
 	my $meta = load_meta('META.json', 'META.yml');
 
 	#XXX check_dependencies($meta, 'configure', 'requires');
-	my $loader = Dist::Build::Loader->new(arguments => \@args, environment => \%ENV);
-	my $configurator = $loader->create_configurator($meta);
-	$configurator->write_buildscript(\@args);
-	$configurator->write_mymeta;
-	return;
+	return Dist::Build::Loader->new->create_configurator($meta)->run(\@args);
 }
 
 1;

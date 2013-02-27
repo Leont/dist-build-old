@@ -24,25 +24,6 @@ has options => (
 	},
 );
 
-has arguments => (
-	isa => 'ArrayRef[Str]',
-	traits => [ 'Array' ],
-	required => 1,
-	handles => {
-		arguments => 'elements',
-	},
-);
-
-has environment => (
-	isa => 'HashRef[Str]',
-	traits => [ 'Hash' ],
-	required => 1,
-	handles => {
-		environment => 'elements',
-		get_env     => 'get'
-	},
-);
-
 has info_class => (
 	is      => 'ro',
 	isa     => 'Str',
@@ -64,7 +45,7 @@ sub _load_plugin {
 }
 
 sub create_builder {
-	my ($self, $meta) = @_;
+	my ($self, $meta, $args, $env) = @_;
 	my $pregraph = decode_json(read_file(q{_build/graph}));
 	my $commandset = Build::Graph::CommandSet->new;
 	for my $dependency (@{ $pregraph->{dependencies} }) {
@@ -73,7 +54,7 @@ sub create_builder {
 		$plugin->configure_commands($commandset) if $plugin->does('Build::Graph::Role::Command');
 		$self->add_options($plugin->options) if $plugin->does('Dist::Build::Role::OptionProvider');
 	}
-	my ($opt, $config) = $self->_parse_arguments;
+	my ($action, $opt, $config) = $self->_parse_arguments($args, $env);
 	my $graph = Build::Graph->new(commands => $commandset, info_class => $self->info_class);
 	$graph->load_from_hashref($pregraph->{graph});
 	require Dist::Build::Builder;
@@ -81,6 +62,7 @@ sub create_builder {
 		meta_info => $meta,
 		options   => $opt,
 		config    => $config,
+		action    => $action,
 		graph     => $graph,
 	);
 }
@@ -88,29 +70,24 @@ sub create_builder {
 sub create_configurator {
 	my ($self, $meta) = @_;
 	my @plugins = map { $self->_load_plugin($_)->new(name => $_) } $self->_modules_to_load;
-	my ($opt, $config) = $self->_parse_arguments(1);
 	require Dist::Build::Configurator;
 	return Dist::Build::Configurator->new(
 		meta_info => $meta,
-		options   => $opt,
-		config    => $config,
 		plugins   => \@plugins,
 		info_class => $self->info_class,
 	);
 }
 
 sub _parse_arguments {
-	my ($self, $skip_saved) = @_;
-	my @argv   = $self->arguments;
-	my %env    = $self->environment;
-	my $bpl    = $skip_saved ? [] : decode_json(read_file('_build/params'));
-	my $action = @argv && $argv[0] =~ / \A \w+ \z /x ? shift @argv : 'build';
+	my ($self, $args, $env) = @_;
+	my $bpl    = decode_json(read_file('_build/params'));
+	my $action = @{$args} && $args->[0] =~ / \A \w+ \z /x ? shift @{$args} : 'build';
 	my $rc_opts = read_config();
-	my @env = defined $env{PERL_MB_OPT} ? split_like_shell($env{PERL_MB_OPT}) : ();
-	my @all_arguments = map { @{$_} } grep { defined } $rc_opts->{'*'}, $bpl, $rc_opts->{$action}, \@env, \@argv;
+	my @env = defined $env->{PERL_MB_OPT} ? split_like_shell($env->{PERL_MB_OPT}) : ();
+	my @all_arguments = map { @{$_} } grep { defined } $rc_opts->{'*'}, $bpl, $rc_opts->{$action}, \@env, $args;
 	GetOptionsFromArray(\@all_arguments, \my %opt, $self->options);
 	my $config = ExtUtils::Config->new(delete $opt{config});
-	return (\%opt, $config);
+	return ($action, \%opt, $config);
 }
 
 1;

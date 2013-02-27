@@ -80,7 +80,7 @@ sub load_graph_plugins {
 	return;
 }
 
-sub write_buildscript {
+sub run {
 	my ($self, $arguments) = @_;
 	my $meta = $self->meta_info;
 
@@ -93,11 +93,6 @@ sub write_buildscript {
 	write_file(qw{_build/params}, encode_json($arguments));
 	my @dependencies = uniq(map { $_->dependencies } $self->plugins_with(-Graph::Manipulator));
 	write_file(qw{_build/graph}, encode_json({dependencies => \@dependencies, graph => $self->graph->nodes_to_hashref }));
-	return;
-}
-
-sub write_mymeta {
-	my $self = shift;
 
 	$self->meta_info->save('MYMETA.json');
 	$self->meta_info->save('MYMETA.yml', { version => 1.4 });
