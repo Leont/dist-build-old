@@ -10,10 +10,11 @@ use Carp qw/croak/;
 use CPAN::Meta;
 use ExtUtils::BuildRC 0.003 qw/read_config/;
 use ExtUtils::Config;
-use ExtUtils::Helpers 0.007 qw/split_like_shell/;
-use File::Slurp qw/read_file/;
+use ExtUtils::Helpers 0.007 qw/split_like_shell make_executable/;
+use File::Slurp qw/read_file write_file/;
 use Getopt::Long qw/GetOptionsFromArray/;
-use JSON 2 qw/decode_json/;
+use JSON 2 qw/encode_json decode_json/;
+use List::MoreUtils qw/uniq/;
 use Module::Runtime qw/require_module/;
 
 sub load_meta {
@@ -70,18 +71,40 @@ sub Build {
 	return $graph->run($action, options => $options, config => $config, meta_info => $meta);
 }
 
+sub plugins_with {
+	my ($role, @plugins) = @_;
+	$role =~ s/ ^ - /Dist::Build::Role::/xms;
+	return grep { $_->does($role) } @plugins;
+}
+
 sub Build_PL {
 	my @args = @_;
 	my $meta = load_meta('META.json', 'META.yml');
 
 	#XXX check_dependencies($meta, 'configure', 'requires');
+	
+	printf "Creating new 'Build' script for '%s' version '%s'\n", $meta->name, $meta->version;
+	my $dir = $meta->name eq 'Dist-Build' ? 'lib' : 'inc';
+	write_file('Build', "#!perl\nuse lib '$dir';\nuse Dist::Build;\nBuild(\\\@ARGV, \\\%ENV);\n");
+	make_executable('Build');
+
+	mkdir '_build' if not -d '_build';
+	write_file(qw{_build/params}, encode_json(\@args));
+
 	my @plugins = map { _load_plugin($_)->new(name => $_) } _modules_to_load();
-	require Dist::Build::Configurator;
-	return Dist::Build::Configurator->new(
-		meta_info  => $meta,
-		plugins    => \@plugins,
-		info_class => $info_class,
-	)->run(\@args);
+	my @dependencies = uniq(map { $_->dependencies } plugins_with(-Graph::Manipulator, @plugins));
+	my $graph = Build::Graph->new(info_class => $info_class);
+	for my $commandset (plugins_with(-Graph::Command, @plugins)) {
+		$commandset->configure_commands($graph->commands);
+	}
+	for my $grapher (plugins_with(-Graph::Manipulator, @plugins)) {
+		$grapher->manipulate_graph($graph);
+	}
+	write_file(qw{_build/graph}, encode_json({ dependencies => \@dependencies, graph => $graph->nodes_to_hashref }));
+
+	$meta->save('MYMETA.json');
+	$meta->save('MYMETA.yml', { version => 1.4 });
+	return;
 }
 
 1;
