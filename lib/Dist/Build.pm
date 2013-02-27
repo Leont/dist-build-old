@@ -5,10 +5,9 @@ use warnings;
 use Exporter 5.57 'import';
 our @EXPORT = qw/Build Build_PL/;
 
-use Carp qw/croak/;
-
-use CPAN::Meta;
 use Build::Graph;
+use Carp qw/croak/;
+use CPAN::Meta;
 use ExtUtils::BuildRC 0.003 qw/read_config/;
 use ExtUtils::Config;
 use ExtUtils::Helpers 0.007 qw/split_like_shell/;
@@ -64,17 +63,11 @@ sub Build {
 		$plugin->configure_commands($commandset) if $plugin->does('Build::Graph::Role::Command');
 		push @options, $plugin->options if $plugin->does('Dist::Build::Role::OptionProvider');
 	}
-	my ($action, $opt, $config) = _parse_arguments($args, $env, \@options);
 	my $graph = Build::Graph->new(commands => $commandset, info_class => $info_class);
 	$graph->load_from_hashref($pregraph->{graph});
-	require Dist::Build::Builder;
-	return Dist::Build::Builder->new(
-		meta_info => $meta,
-		options   => $opt,
-		config    => $config,
-		action    => $action,
-		graph     => $graph,
-	)->run;
+
+	my ($action, $options, $config) = _parse_arguments($args, $env, \@options);
+	return $graph->run($action, options => $options, config => $config, meta_info => $meta);
 }
 
 sub Build_PL {
