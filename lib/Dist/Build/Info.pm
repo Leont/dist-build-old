@@ -15,15 +15,21 @@ has meta_info => (
 	required => 1,
 );
 
-has options => (
-	isa     => 'HashRef',
-	traits  => ['Hash'],
-	handles => {
-		option     => 'get',
-		has_option => 'exists',
-		options    => 'elements',
-	},
+has _options => (
+	is       => 'ro',
+	isa      => 'HashRef',
+	init_arg => 'options',
 );
+
+sub option {
+	my ($self, $key) = @_;
+	return $self->_options->{$key};
+}
+
+sub options {
+	my $self = shift;
+	return %{ $self->_options };
+}
 
 sub verbose {
 	my $self = shift;
