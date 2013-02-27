@@ -6,8 +6,9 @@ use Exporter 5.57 'import';
 our @EXPORT = qw/Build Build_PL/;
 
 use Build::Graph;
-use Carp qw/croak/;
+use Carp qw/croak carp/;
 use CPAN::Meta;
+use CPAN::Meta::Check qw/verify_dependencies/;
 use ExtUtils::BuildRC 0.003 qw/read_config/;
 use ExtUtils::Config;
 use ExtUtils::Helpers 0.007 qw/split_like_shell make_executable/;
@@ -79,10 +80,11 @@ sub plugins_with {
 
 sub Build_PL {
 	my @args = @_;
-	my $meta = load_meta('META.json', 'META.yml');
 
-	#XXX check_dependencies($meta, 'configure', 'requires');
-	
+	my $meta = load_meta('META.json', 'META.yml');
+	my @carp = verify_dependencies($meta, 'configure', 'requires');
+	carp join "\n", @carp if @carp;
+
 	printf "Creating new 'Build' script for '%s' version '%s'\n", $meta->name, $meta->version;
 	my $dir = $meta->name eq 'Dist-Build' ? 'lib' : 'inc';
 	write_file('Build', "#!perl\nuse lib '$dir';\nuse Dist::Build;\nBuild(\\\@ARGV, \\\%ENV);\n");
