@@ -1,23 +1,20 @@
 package Dist::Build::Info;
 
-use Moose;
+use Moo;
 extends 'Build::Graph::Info';
 
 has config => (
 	is       => 'ro',
-	isa      => 'ExtUtils::Config',
 	required => 1,
 );
 
 has meta_info => (
 	is       => 'ro',
-	isa      => 'CPAN::Meta',
 	required => 1,
 );
 
 has _options => (
 	is       => 'ro',
-	isa      => 'HashRef',
 	init_arg => 'options',
 );
 

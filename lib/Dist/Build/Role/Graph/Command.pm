@@ -1,6 +1,6 @@
 package Dist::Build::Role::Graph::Command;
 
-use Moose::Role;
+use Moo::Role;
 
 with qw/Dist::Build::Role::Plugin Build::Graph::Role::Command/;
 

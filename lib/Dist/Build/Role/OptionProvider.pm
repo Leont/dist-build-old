@@ -1,6 +1,6 @@
 package Dist::Build::Role::OptionProvider;
 
-use Moose::Role;
+use Moo::Role;
 
 with 'Dist::Build::Role::Plugin';
 

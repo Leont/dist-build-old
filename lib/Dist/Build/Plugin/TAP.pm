@@ -1,6 +1,6 @@
 package Dist::Build::Plugin::TAP;
 
-use Moose;
+use Moo;
 with qw/Dist::Build::Role::Graph::Command Dist::Build::Role::Graph::Manipulator/;
 
 use Carp;

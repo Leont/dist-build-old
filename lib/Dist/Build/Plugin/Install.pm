@@ -1,6 +1,6 @@
 package Dist::Build::Plugin::Install;
 
-use Moose;
+use Moo;
 with qw/Dist::Build::Role::Graph::Command Dist::Build::Role::Graph::Manipulator Dist::Build::Role::OptionProvider/;
 
 use ExtUtils::Install qw/install/;

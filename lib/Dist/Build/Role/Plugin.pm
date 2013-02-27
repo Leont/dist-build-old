@@ -1,13 +1,9 @@
 package Dist::Build::Role::Plugin;
 
-use Moose::Role;
-use Moose::Util::TypeConstraints;
-
-role_type 'Dist::Build::Role::Plugin';
+use Moo::Role;
 
 has name => (
 	is       => 'ro',
-	isa      => 'Str',
 	required => 1,
 );
 

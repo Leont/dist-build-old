@@ -1,6 +1,6 @@
 package Dist::Build::Plugin::CopyPM;
 
-use Moose;
+use Moo;
 with qw/Dist::Build::Role::Graph::Manipulator/;
 
 use File::Spec::Functions qw/catfile/;
