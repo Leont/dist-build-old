@@ -71,6 +71,7 @@ sub create_builder {
 		my $module = $self->_load_plugin($dependency);
 		my $plugin = $module->new(name => $dependency);
 		$plugin->configure_commands($commandset) if $plugin->does('Build::Graph::Role::Command');
+		$self->add_options($plugin->options) if $plugin->does('Dist::Build::Role::OptionProvider');
 	}
 	my ($opt, $config) = $self->_parse_arguments;
 	my $graph = Build::Graph->new(commands => $commandset, info_class => $self->info_class);

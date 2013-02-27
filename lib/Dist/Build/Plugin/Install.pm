@@ -1,7 +1,7 @@
 package Dist::Build::Plugin::Install;
 
 use Moose;
-with qw/Dist::Build::Role::Graph::Command Dist::Build::Role::Graph::Manipulator/;
+with qw/Dist::Build::Role::Graph::Command Dist::Build::Role::Graph::Manipulator Dist::Build::Role::OptionProvider/;
 
 use ExtUtils::Install qw/install/;
 use ExtUtils::InstallPaths;
@@ -23,10 +23,9 @@ sub manipulate_graph {
 	return;
 }
 
-after 'configure' => sub {
-	my ($class, $loader) = @_;
-	$loader->add_options(qw/install_base=s install_path=s% installdirs=s destdir=s prefix=s uninst:1 dry_run:1/);
-};
+sub options {
+	return qw/install_base=s install_path=s% installdirs=s destdir=s prefix=s uninst:1 dry_run:1/;
+}
 
 1;
 
