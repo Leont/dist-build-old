@@ -65,8 +65,7 @@ sub Build {
 		$plugin->configure_commands($commandset) if $plugin->does('Build::Graph::Role::Command');
 		push @options, $plugin->options if $plugin->does('Dist::Build::Role::OptionProvider');
 	}
-	my $graph = Build::Graph->new(commands => $commandset, info_class => $info_class);
-	$graph->load_from_hashref($pregraph->{graph});
+	my $graph = Build::Graph->new(commands => $commandset, info_class => $info_class, nodes => $pregraph->{graph});
 
 	my ($action, $options, $config) = _parse_arguments($args, $env, \@options);
 	return $graph->run($action, options => $options, config => $config, meta_info => $meta);
