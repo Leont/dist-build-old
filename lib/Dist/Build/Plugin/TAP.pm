@@ -1,7 +1,7 @@
 package Dist::Build::Plugin::TAP;
 
 use Moo;
-with qw/Dist::Build::Role::Graph::Command Dist::Build::Role::Graph::Manipulator/;
+with qw/Dist::Build::Role::Graph::CommandProvider Dist::Build::Role::Graph::Manipulator/;
 
 use Carp;
 use File::Next;
@@ -12,14 +12,14 @@ my $file_filter = sub { m/ \.t \z/xms };
 my $descend_filter = sub { $_ ne 'CVS' and $_ ne '.svn' };
 
 sub configure_commands {
-	my ($self, $commands) = @_;
-	$commands->add('tap-harness', sub {
-		my $info = shift;
-		my $tester = TAP::Harness->new({verbosity => $info->verbose, lib => rel2abs(catdir(qw/blib lib/)), color => -t STDOUT});
-		my $results = $tester->runtests(@{ $info->arguments->{files} });
-		croak "Errors in testing.  Cannot continue.\n" if $results->has_errors;
-	});
-	return;
+	return {
+		'tap-harness' => sub {
+			my $info    = shift;
+			my $tester  = TAP::Harness->new({ verbosity => $info->verbose, lib => rel2abs(catdir(qw/blib lib/)), color => -t STDOUT });
+			my $results = $tester->runtests(@{ $info->arguments->{files} });
+			croak "Errors in testing.  Cannot continue.\n" if $results->has_errors;
+		},
+	};
 }
 
 sub manipulate_graph {

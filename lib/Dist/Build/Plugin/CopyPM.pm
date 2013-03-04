@@ -20,7 +20,6 @@ sub manipulate_graph {
 	my @destinations;
 	while (defined(my $source = $iter->())) {
 		my $destination = catfile('blib', $source);
-		$graph->add_file($source);
 		$graph->add_file($destination, actions => { command => 'copy', arguments => { source => $source } });
 		push @destinations, $destination;
 	}

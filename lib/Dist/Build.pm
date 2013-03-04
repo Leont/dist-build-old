@@ -56,15 +56,17 @@ sub Build {
 	my ($args, $env) = @_;
 	my $meta = load_meta('MYMETA.json', 'MYMETA.yml');
 
-	my $pregraph   = decode_json(read_file(q{_build/graph}));
-	my $commandset = Build::Graph::CommandSet->new;
-	my @options    = qw/config=s% verbose:1/;
+	my $pregraph = decode_json(read_file(q{_build/graph}));
+	my @options  = qw/config=s% verbose:1/;
+
+	my @commands;
 	for my $dependency (@{ $pregraph->{dependencies} }) {
 		my $module = _load_plugin($dependency);
 		my $plugin = $module->new(name => $dependency);
-		$plugin->configure_commands($commandset) if $plugin->does('Build::Graph::Role::Command');
-		push @options, $plugin->options if $plugin->does('Dist::Build::Role::OptionProvider');
+		push @commands, $plugin->configure_commands if $plugin->does('Build::Graph::Role::CommandProvider');
+		push @options,  $plugin->options            if $plugin->does('Dist::Build::Role::OptionProvider');
 	}
+	my $commandset = Build::Graph::CommandSet->new(commands => { map { %{$_} } @commands });
 	my $graph = Build::Graph->new(commands => $commandset, info_class => $info_class, nodes => $pregraph->{graph});
 
 	my ($action, $options, $config) = _parse_arguments($args, $env, \@options);
@@ -94,10 +96,9 @@ sub Build_PL {
 
 	my @plugins = map { _load_plugin($_)->new(name => $_) } _modules_to_load();
 	my @dependencies = uniq(map { $_->dependencies } plugins_with(-Graph::Manipulator, @plugins));
-	my $graph = Build::Graph->new(info_class => $info_class);
-	for my $commandset (plugins_with(-Graph::Command, @plugins)) {
-		$commandset->configure_commands($graph->commands);
-	}
+	my %commands = map { %{$_} } map { $_->configure_commands } plugins_with(-Graph::CommandProvider, @plugins);
+	my $commandset = Build::Graph::CommandSet->new(commands => \%commands);
+	my $graph = Build::Graph->new(commands => $commandset, info_class => $info_class);
 	for my $grapher (plugins_with(-Graph::Manipulator, @plugins)) {
 		$grapher->manipulate_graph($graph);
 	}
