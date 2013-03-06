@@ -28,10 +28,13 @@ sub options {
 	return %{ $self->_options };
 }
 
-sub verbose {
-	my $self = shift;
-	return $self->option('verbose');
-}
+has verbose => (
+	is      => 'ro',
+	default => sub {
+		my $self = shift;
+		return $self->option('verbose');
+	},
+);
 
 1;
 
