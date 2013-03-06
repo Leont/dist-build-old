@@ -23,16 +23,20 @@ sub option {
 	return $self->_options->{$key};
 }
 
-sub options {
-	my $self = shift;
-	return %{ $self->_options };
-}
-
 has verbose => (
 	is      => 'ro',
 	default => sub {
 		my $self = shift;
 		return $self->option('verbose');
+	},
+);
+
+has install_paths => (
+	is => 'lazy',
+	default => sub {
+		my $self = shift;
+		require ExtUtils::InstallPaths;
+		return ExtUtils::InstallPaths->new(%{ $self->_options }, config => $self->config, dist_name => $self->meta_info->name);
 	},
 );
 

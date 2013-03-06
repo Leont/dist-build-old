@@ -57,7 +57,7 @@ sub Build {
 	my $meta = load_meta('MYMETA.json', 'MYMETA.yml');
 
 	my $pregraph = decode_json(read_file(q{_build/graph}));
-	my @options  = qw/config=s% verbose:1/;
+	my @options  = qw/config=s% verbose:1 install_base=s install_path=s% installdirs=s destdir=s prefix=s/;
 
 	my @commands;
 	for my $dependency (@{ $pregraph->{dependencies} }) {
