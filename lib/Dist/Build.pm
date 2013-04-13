@@ -96,13 +96,13 @@ sub Build_PL {
 
 	my @plugins = map { _load_plugin($_)->new(name => $_) } _modules_to_load();
 	my @dependencies = uniq(map { $_->dependencies } plugins_with(-Graph::Manipulator, @plugins));
-	my %commands = map { %{$_} } map { $_->configure_commands } plugins_with(-Graph::CommandProvider, @plugins);
+	my %commands = map { %{ $_->configure_commands } } plugins_with(-Graph::CommandProvider, @plugins);
 	my $commandset = Build::Graph::CommandSet->new(commands => \%commands);
 	my $graph = Build::Graph->new(commands => $commandset, info_class => $info_class);
 	for my $grapher (plugins_with(-Graph::Manipulator, @plugins)) {
 		$grapher->manipulate_graph($graph);
 	}
-	write_file(qw{_build/graph}, encode_json({ dependencies => \@dependencies, graph => $graph->nodes_to_hashref }));
+	write_file(qw{_build/graph}, JSON->new->pretty->encode({ dependencies => \@dependencies, graph => $graph->nodes_to_hashref }));
 
 	$meta->save('MYMETA.json');
 	$meta->save('MYMETA.yml', { version => 1.4 });
