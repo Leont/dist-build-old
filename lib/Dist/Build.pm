@@ -9,7 +9,6 @@ use Build::Graph;
 use Carp qw/croak carp/;
 use CPAN::Meta;
 use CPAN::Meta::Check qw/verify_dependencies/;
-use ExtUtils::BuildRC 0.003 qw/read_config/;
 use ExtUtils::Config;
 use ExtUtils::Helpers 0.007 qw/split_like_shell make_executable/;
 use File::Slurp qw/read_file write_file/;
@@ -44,10 +43,8 @@ sub _parse_arguments {
 	my ($args, $env, $options) = @_;
 	my $bpl     = decode_json(read_file('_build/params'));
 	my $action  = @{$args} && $args->[0] =~ / \A \w+ \z /xms ? shift @{$args} : 'build';
-	my $rc_opts = read_config();
 	my @env     = defined $env->{PERL_MB_OPT} ? split_like_shell($env->{PERL_MB_OPT}) : ();
-	my @all     = map { @{$_} } grep { defined } $rc_opts->{'*'}, $bpl, $rc_opts->{$action}, \@env, $args;
-	GetOptionsFromArray(\@all, \my %opt, @{$options});
+	GetOptionsFromArray([ @{$bpl}, @env, @{$args} ], \my %opt, @{$options});
 	my $config = ExtUtils::Config->new(delete $opt{config});
 	return ($action, \%opt, $config);
 }
