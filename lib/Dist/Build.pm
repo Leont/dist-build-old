@@ -11,7 +11,7 @@ use CPAN::Meta;
 use CPAN::Meta::Check qw/verify_dependencies/;
 use ExtUtils::Config;
 use ExtUtils::Helpers 0.007 qw/split_like_shell make_executable/;
-use File::Slurp qw/read_file write_file/;
+use File::Slurp::Tiny qw/read_file write_file/;
 use Getopt::Long qw/GetOptionsFromArray/;
 use JSON 2 qw/encode_json decode_json/;
 use List::MoreUtils qw/uniq/;
