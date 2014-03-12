@@ -9,7 +9,6 @@ our @EXPORT = qw/Build Build_PL/;
 use Build::Graph;
 use Carp qw/croak carp/;
 use CPAN::Meta;
-use CPAN::Meta::Check qw/verify_dependencies/;
 use ExtUtils::Config;
 use ExtUtils::Helpers 0.007 qw/split_like_shell make_executable/;
 use File::Slurp::Tiny qw/read_file write_file/;
@@ -63,8 +62,6 @@ sub Build_PL {
 	my @args = @_;
 
 	my $meta = load_meta('META.json', 'META.yml');
-	my @carp = verify_dependencies($meta, 'configure', 'requires');
-	carp join "\n", @carp if @carp;
 
 	printf "Creating new 'Build' script for '%s' version '%s'\n", $meta->name, $meta->version;
 	my $dir = $meta->name eq 'Dist-Build' ? 'lib' : 'inc';

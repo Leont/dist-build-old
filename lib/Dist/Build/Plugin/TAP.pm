@@ -37,9 +37,8 @@ sub manipulate_graph {
 		$graph->add_file($testfile);
 	}
 
-	$graph->add_phony('testdeps', actions => { command => 'Core/checkdeps', arguments => { phases => [qw/runtime build test/] } });
 	$graph->add_phony('testbuild', dependencies => [ 'build', @files ]);
-	$graph->add_phony('test', actions => { command => 'TAP/tap-harness', arguments => { files => \@files } }, dependencies => [ 'testbuild', 'testdeps' ]);
+	$graph->add_phony('test', actions => { command => 'TAP/tap-harness', arguments => { files => \@files } }, dependencies => [ 'testbuild' ]);
 	return;
 }
 
