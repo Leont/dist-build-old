@@ -6,18 +6,23 @@ with qw/Dist::Build::Role::Graph::CommandProvider Dist::Build::Role::Graph::Mani
 use ExtUtils::Install qw/install/;
 
 sub configure_commands {
-	return {
-		install => sub {
-			my $info = shift;
-			install($info->install_paths->install_map, $info->verbose, 1, $info->option('uninst'));
-			return;
+	my ($self, $commandset) = @_;
+	$commandset->add('Install',
+		module => __PACKAGE__,
+		commands => {
+			'install' => sub {
+				my $info = shift;
+				install($info->install_paths->install_map, $info->verbose, 1, $info->option('uninst'));
+				return;
+			},
 		},
-	};
+	);
+	return;
 }
 
 sub manipulate_graph {
 	my ($self, $graph) = @_;
-	$graph->add_phony('install', actions => 'install', dependencies => ['build']);
+	$graph->add_phony('install', actions => 'Install/install', dependencies => ['build']);
 	return;
 }
 

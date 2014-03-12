@@ -12,14 +12,19 @@ my $file_filter = sub { m/ \.t \z/xms };
 my $descend_filter = sub { $_ ne 'CVS' and $_ ne '.svn' };
 
 sub configure_commands {
-	return {
-		'tap-harness' => sub {
-			my $info    = shift;
-			my $tester  = TAP::Harness->new({ verbosity => $info->verbose, lib => rel2abs(catdir(qw/blib lib/)), color => -t STDOUT });
-			my $results = $tester->runtests(@{ $info->arguments->{files} });
-			croak "Errors in testing.  Cannot continue.\n" if $results->has_errors;
+	my ($self, $commandset) = @_;
+	$commandset->add('TAP',
+		module => __PACKAGE__,
+		commands => {
+			'tap-harness' => sub {
+				my $info    = shift;
+				my $tester  = TAP::Harness->new({ verbosity => $info->verbose, lib => rel2abs(catdir(qw/blib lib/)), color => -t STDOUT });
+				my $results = $tester->runtests(@{ $info->arguments->{files} });
+				croak "Errors in testing.  Cannot continue.\n" if $results->has_errors;
+			},
 		},
-	};
+	);
+	return;
 }
 
 sub manipulate_graph {
@@ -32,9 +37,9 @@ sub manipulate_graph {
 		$graph->add_file($testfile);
 	}
 
-	$graph->add_phony('testdeps', actions => { command => 'checkdeps', arguments => { phases => [qw/runtime build test/] } });
+	$graph->add_phony('testdeps', actions => { command => 'Core/checkdeps', arguments => { phases => [qw/runtime build test/] } });
 	$graph->add_phony('testbuild', dependencies => [ 'build', @files ]);
-	$graph->add_phony('test', actions => { command => 'tap-harness', arguments => { files => \@files } }, dependencies => [ 'testbuild', 'testdeps' ]);
+	$graph->add_phony('test', actions => { command => 'TAP/tap-harness', arguments => { files => \@files } }, dependencies => [ 'testbuild', 'testdeps' ]);
 	return;
 }
 

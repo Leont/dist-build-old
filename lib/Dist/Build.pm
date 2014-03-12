@@ -1,4 +1,5 @@
 package Dist::Build;
+
 use strict;
 use warnings;
 
@@ -14,8 +15,8 @@ use ExtUtils::Helpers 0.007 qw/split_like_shell make_executable/;
 use File::Slurp::Tiny qw/read_file write_file/;
 use Getopt::Long qw/GetOptionsFromArray/;
 use JSON 2 qw/encode_json decode_json/;
-use List::MoreUtils qw/uniq/;
-use Module::Runtime qw/require_module/;
+
+use Dist::Build::PluginLoader;
 
 sub load_meta {
 	my @files = @_;
@@ -29,14 +30,6 @@ my $info_class = 'Dist::Build::Info';
 
 sub _modules_to_load {
 	return @modules;
-}
-
-sub _load_plugin {
-	my $plugin = shift;
-	(my $module = $plugin) =~ s/ ^ - /Dist::Build::Plugin::/xms;
-	require_module($module);
-	$module->configure;
-	return $module;
 }
 
 sub _parse_arguments {
@@ -56,24 +49,14 @@ sub Build {
 	my $pregraph = decode_json(read_file(q{_build/graph}));
 	my @options  = qw/config=s% verbose:1 install_base=s install_path=s% installdirs=s destdir=s prefix=s/;
 
-	my @commands;
-	for my $dependency (@{ $pregraph->{dependencies} }) {
-		my $module = _load_plugin($dependency);
-		my $plugin = $module->new(name => $dependency);
-		push @commands, $plugin->configure_commands if $plugin->does('Build::Graph::Role::CommandProvider');
-		push @options,  $plugin->options            if $plugin->does('Dist::Build::Role::OptionProvider');
-	}
-	my $commandset = Build::Graph::CommandSet->new(commands => { map { %{$_} } @commands });
-	my $graph = Build::Graph->new(commands => $commandset, info_class => $info_class, nodes => $pregraph->{graph});
+	my $graph = Build::Graph->load($pregraph);
+	$graph->loader->add_handler('Dist::Build::Role::Options', sub {
+		my ($graph, $module) = @_;
+		push @options, $module->options;
+	});
 
 	my ($action, $options, $config) = _parse_arguments($args, $env, \@options);
 	return $graph->run($action, options => $options, config => $config, meta_info => $meta);
-}
-
-sub plugins_with {
-	my ($role, @plugins) = @_;
-	$role =~ s/ ^ - /Dist::Build::Role::/xms;
-	return grep { $_->does($role) } @plugins;
 }
 
 sub Build_PL {
@@ -91,15 +74,17 @@ sub Build_PL {
 	mkdir '_build' if not -d '_build';
 	write_file(qw{_build/params}, encode_json(\@args));
 
-	my @plugins = map { _load_plugin($_)->new(name => $_) } _modules_to_load();
-	my @dependencies = uniq(map { $_->dependencies } plugins_with(-Graph::Manipulator, @plugins));
-	my %commands = map { %{ $_->configure_commands } } plugins_with(-Graph::CommandProvider, @plugins);
-	my $commandset = Build::Graph::CommandSet->new(commands => \%commands);
-	my $graph = Build::Graph->new(commands => $commandset, info_class => $info_class);
-	for my $grapher (plugins_with(-Graph::Manipulator, @plugins)) {
-		$grapher->manipulate_graph($graph);
-	}
-	write_file(qw{_build/graph}, JSON->new->pretty->encode({ dependencies => \@dependencies, graph => $graph->nodes_to_hashref }));
+	my $graph = Build::Graph->new(info_class => $info_class, loader_class => 'Dist::Build::PluginLoader');
+	$graph->loader->add_handler('-Graph::CommandProvider' => sub {
+		my ($graph, $module) = @_;
+		$module->configure_commands($graph->commandset);
+	});
+	$graph->loader->add_handler('-Graph::Manipulator', sub {
+		my ($graph, $module) = @_;
+		$module->manipulate_graph($graph);
+	});
+	$graph->loader->load($_) for _modules_to_load();
+	write_file(qw{_build/graph}, JSON->new->canonical->pretty->encode($graph->to_hashref));
 
 	$meta->save('MYMETA.json');
 	$meta->save('MYMETA.yml', { version => 1.4 });
