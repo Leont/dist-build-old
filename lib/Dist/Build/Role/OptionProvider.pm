@@ -1,10 +1,9 @@
 package Dist::Build::Role::OptionProvider;
 
-use Moo::Role;
+use strict;
+use warnings;
 
-with 'Dist::Build::Role::Plugin';
-
-requires 'options';
+sub options;
 
 1;
 

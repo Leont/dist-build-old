@@ -1,27 +1,24 @@
 package Dist::Build::PluginLoader;
 
-use Moo;
-with 'Build::Graph::Role::Loader';
+use strict;
+use warnings;
 
-use Module::Runtime;
+use parent 'Build::Graph::ClassLoader';
 
-has _loaded => (
-	is       => 'ro',
-	default  => sub { {} },
-);
-
-has _with => (
-	is       => 'ro',
-	init_arg => undef,
-	default  => sub { {} },
-);
+sub new {
+	my ($class, %arguments) = @_;
+	my $self = $class->SUPER::new(%arguments);
+	$self->{loaded} = {},
+	$self->{with}   = {},
+	return $self;
+}
 
 sub add_handler {
 	my ($self, $name, $callback) = @_;
 	(my $full = $name) =~ s/ ^ - /Dist::Build::Role::/xms;
-	$self->_with->{$full} = $callback;
-	for my $plugin (keys %{ $self->_loaded }) {
-		if ($plugin->does($full)) {
+	$self->{with}{$full} = $callback;
+	for my $plugin (keys %{ $self->{loaded} }) {
+		if ($plugin->isa($full)) {
 			$callback->($self->graph, $plugin);
 		}
 	}
@@ -30,13 +27,13 @@ sub add_handler {
 
 sub load {
 	my ($self, $plugin) = @_;
-	return $self->_loaded->{$plugin} ||= $self->_load_plugin($plugin);
+	return $self->{loaded}{$plugin} ||= $self->_load_plugin($plugin);
 }
 
 sub _load_plugin {
 	my ($self, $plugin) = @_;
 	(my $module = $plugin) =~ s/ ^ - /Dist::Build::Plugin::/xms;
-	Module::Runtime::require_module($module);
+	$self->SUPER::load($module);
 	$module->configure;
 	my $ret = $module->new(name => $plugin, graph => $self->graph);
 	$self->_match_plugin($ret);
@@ -45,9 +42,9 @@ sub _load_plugin {
 
 sub _match_plugin {
 	my ($self, $plugin) = @_;
-	for my $matcher (keys %{ $self->_with }) {
-		if ($plugin->does($matcher)) {
-			$self->_with->{$matcher}->($self->graph, $plugin);
+	for my $matcher (keys %{ $self->{with} }) {
+		if ($plugin->isa($matcher)) {
+			$self->{with}{$matcher}->($self->graph, $plugin);
 		}
 	}
 }

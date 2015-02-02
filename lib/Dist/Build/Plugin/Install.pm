@@ -1,7 +1,9 @@
 package Dist::Build::Plugin::Install;
 
-use Moo;
-with qw/Dist::Build::Role::Graph::CommandProvider Dist::Build::Role::Graph::Manipulator Dist::Build::Role::OptionProvider/;
+use strict;
+use warnings;
+
+use parent qw/Dist::Build::Role::Plugin Build::Graph::Role::Manipulator Build::Graph::Role::CommandProvider Dist::Build::Role::OptionProvider/;
 
 use ExtUtils::Install qw/install/;
 

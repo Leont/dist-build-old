@@ -1,7 +1,9 @@
 package Dist::Build::Plugin::CopyPM;
 
-use Moo;
-with qw/Dist::Build::Role::Graph::Manipulator/;
+use strict;
+use warnings;
+
+use parent qw/Dist::Build::Role::Plugin Build::Graph::Role::Manipulator/;
 
 use File::Spec::Functions qw/catfile/;
 use File::Next;

@@ -1,7 +1,9 @@
 package Dist::Build::Plugin::Sanity;
 
-use Moo;
-with qw/Dist::Build::Role::Graph::CommandProvider Dist::Build::Role::Graph::Manipulator/;
+use strict;
+use warnings;
+
+use parent qw/Dist::Build::Role::Plugin Build::Graph::Role::Manipulator Build::Graph::Role::CommandProvider/;
 
 use Carp;
 use File::Copy 'copy';

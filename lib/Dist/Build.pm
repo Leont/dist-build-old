@@ -55,7 +55,7 @@ sub Build {
 	});
 
 	my ($action, $options, $config) = _parse_arguments($args, $env, \@options);
-	return $graph->run($action, options => $options, config => $config, meta_info => $meta);
+	return $graph->run($action, options => $options, config => $config, meta => $meta);
 }
 
 sub Build_PL {
@@ -72,11 +72,11 @@ sub Build_PL {
 	write_file(qw{_build/params}, encode_json(\@args));
 
 	my $graph = Build::Graph->new(info_class => $info_class, loader_class => 'Dist::Build::PluginLoader');
-	$graph->loader->add_handler('-Graph::CommandProvider' => sub {
+	$graph->loader->add_handler('Build::Graph::Role::CommandProvider' => sub {
 		my ($graph, $module) = @_;
 		$module->configure_commands($graph->commandset);
 	});
-	$graph->loader->add_handler('-Graph::Manipulator', sub {
+	$graph->loader->add_handler('Build::Graph::Role::Manipulator', sub {
 		my ($graph, $module) = @_;
 		$module->manipulate_graph($graph);
 	});

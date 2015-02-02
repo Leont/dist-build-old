@@ -1,7 +1,9 @@
 package Dist::Build::Plugin::TAP;
 
-use Moo;
-with qw/Dist::Build::Role::Graph::CommandProvider Dist::Build::Role::Graph::Manipulator/;
+use strict;
+use warnings;
+
+use parent qw/Dist::Build::Role::Plugin Build::Graph::Role::Manipulator Build::Graph::Role::CommandProvider/;
 
 use Carp;
 use File::Next;
@@ -34,7 +36,6 @@ sub manipulate_graph {
 	my @files;
 	while (defined(my $testfile = $iter->())) {
 		push @files, $testfile;
-		$graph->add_file($testfile);
 	}
 
 	$graph->add_phony('testbuild', dependencies => [ 'build', @files ]);

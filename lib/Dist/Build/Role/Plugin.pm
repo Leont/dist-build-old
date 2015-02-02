@@ -1,11 +1,19 @@
 package Dist::Build::Role::Plugin;
 
-use Moo::Role;
+use strict;
+use warnings;
 
-has name => (
-	is       => 'ro',
-	required => 1,
-);
+sub new {
+	my ($class, %args) = @_;
+	return bless {
+		name => $args{name} || Carp::croak('No name given'),
+	}, $class;
+}
+
+sub name {
+	my $self = shift;
+	return $self->{name};
+}
 
 sub configure {
 }
