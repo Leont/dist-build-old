@@ -8,8 +8,8 @@ use parent 'Build::Graph::ClassLoader';
 sub new {
 	my ($class, %arguments) = @_;
 	my $self = $class->SUPER::new(%arguments);
-	$self->{loaded} = {},
-	$self->{with}   = {},
+	$self->{loaded} = {};
+	$self->{with}   = {};
 	return $self;
 }
 

@@ -6,10 +6,6 @@ use warnings;
 use parent qw/Dist::Build::Role::Plugin Build::Graph::Role::Manipulator/;
 
 use File::Spec::Functions qw/catfile/;
-use File::Next;
-
-my $file_filter = sub { m/ \. p(?:m|od) \z/xms };
-my $descend_filter = sub { $_ ne 'CVS' and $_ ne '.svn' };
 
 sub dependencies {
 	return 'Dist::Build::Plugin::Sanity';
@@ -18,17 +14,15 @@ sub dependencies {
 sub manipulate_graph {
 	my ($self, $graph) = @_;
 
-	my $iter = File::Next::files({ file_filter => $file_filter, descend_filter => $descend_filter }, 'lib');
-	my @destinations;
-	while (defined(my $source = $iter->())) {
-		my $destination = catfile('blib', $source);
-		$graph->add_file($destination, actions => { command => 'Core/copy', arguments => { source => $source } });
-		push @destinations, $destination;
-	}
-	if (@destinations) {
-		my $copy_pm = $graph->add_phony('copy_pm', dependencies => \@destinations);
-		$graph->get_node('build')->add_dependencies('copy_pm');
-	}
+	$graph->add_phony('copy_pm');
+	$graph->get_node('build')->add_dependencies('copy_pm');
+
+	my $pms = $graph->add_wildcard(dir => 'lib', pattern => '*.{pm,pod}', name => 'pm-files');
+	$graph->add_subst($pms,
+		subst      => sub { my $source = shift; catfile('blib', $source) },
+		action     => sub { my ($target, $source) = @_; [ 'Core/copy', { source => $source } ] },
+		dependents => 'copy_pm'
+	);
 	return;
 }
 

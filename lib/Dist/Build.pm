@@ -11,6 +11,7 @@ use Carp qw/croak carp/;
 use CPAN::Meta;
 use ExtUtils::Config;
 use ExtUtils::Helpers 0.007 qw/split_like_shell make_executable/;
+use ExtUtils::Manifest 'maniread';
 use File::Slurp::Tiny qw/read_file write_file/;
 use Getopt::Long qw/GetOptionsFromArray/;
 use JSON::PP 2 qw/encode_json decode_json/;
@@ -81,10 +82,14 @@ sub Build_PL {
 		$module->manipulate_graph($graph);
 	});
 	$graph->loader->load($_) for _modules_to_load();
+	my $manifest = maniread();
+	$graph->match(keys %{$manifest});
+
 	write_file('_build/graph', JSON::PP->new->canonical->pretty->encode($graph->to_hashref));
 
 	$meta->save('MYMETA.json');
 	$meta->save('MYMETA.yml', { version => 1.4 });
+	$graph->match(qw/MYMETA.json MYMETA.yml/);
 	return;
 }
 
