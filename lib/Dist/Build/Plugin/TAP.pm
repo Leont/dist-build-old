@@ -7,7 +7,7 @@ use parent qw/Dist::Build::Role::Plugin Build::Graph::Role::Manipulator Build::G
 
 use Carp;
 use File::Spec::Functions qw/catdir rel2abs/;
-use TAP::Harness;
+use TAP::Harness::Env;
 
 sub configure_commands {
 	my ($self, $commandset) = @_;
@@ -16,7 +16,7 @@ sub configure_commands {
 		commands => {
 			'tap-harness' => sub {
 				my $info    = shift;
-				my $tester  = TAP::Harness->new({ verbosity => $info->verbose, lib => rel2abs(catdir(qw/blib lib/)), color => -t STDOUT });
+				my $tester  = TAP::Harness::Env->create({ verbosity => $info->verbose, lib => rel2abs(catdir(qw/blib lib/)), color => -t STDOUT });
 				my @files = $info->graph->get_named('test-files');
 
 				my $results = $tester->runtests(@files);
