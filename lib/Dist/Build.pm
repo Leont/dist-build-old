@@ -12,7 +12,6 @@ use CPAN::Meta;
 use ExtUtils::Config;
 use ExtUtils::Helpers 0.007 qw/split_like_shell make_executable/;
 use ExtUtils::Manifest 'maniread';
-use File::Slurp::Tiny qw/read_file write_file/;
 use Getopt::Long qw/GetOptionsFromArray/;
 use JSON::PP 2 qw/encode_json decode_json/;
 
@@ -40,6 +39,22 @@ sub _parse_arguments {
 	GetOptionsFromArray([ @{$bpl}, @env, @{$args} ], \my %opt, @{$options});
 	my $config = ExtUtils::Config->new(delete $opt{config});
 	return ($action, \%opt, $config);
+}
+
+sub read_file {
+	my $filename = shift;
+	open my $fh, '<:raw', $filename or croak "Could not open $filename: $!";
+	my $ret = do { local $/; <$fh> };
+	close $fh or croak "Could not read $filename: $!";
+	return $ret;
+}
+
+sub write_file {
+	my ($filename, $content) = @_;
+	open my $fh, '>:raw', $filename or croak "Could not open $filename: $!";
+	print $fh $content or croak "Could not write $filename: $!";
+	close $fh or croak "Could not write $filename: $!";
+	return;
 }
 
 sub Build {
