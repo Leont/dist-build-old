@@ -21,7 +21,7 @@ use Dist::Build::PluginLoader;
 sub load_meta {
 	my @files = @_;
 	my ($metafile) = grep { -e $_ } @files or croak "No META information provided\n";
-	return CPAN::Meta->load_file($metafile);
+	return CPAN::Meta->load_file($metafile, { lazy_validation => 0 });
 }
 
 #XXX: hardcoded for now.
