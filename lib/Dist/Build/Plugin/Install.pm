@@ -5,8 +5,6 @@ use warnings;
 
 use parent qw/Dist::Build::Role::Plugin Build::Graph::Role::Manipulator Build::Graph::Role::CommandProvider Dist::Build::Role::OptionProvider/;
 
-use ExtUtils::Install qw/install/;
-
 sub configure_commands {
 	my ($self, $commandset) = @_;
 	$commandset->add('Install',
@@ -14,7 +12,8 @@ sub configure_commands {
 		commands => {
 			'install' => sub {
 				my $info = shift;
-				install($info->install_paths->install_map, $info->verbose, 1, $info->option('uninst'));
+				require ExtUtils::Install;
+				ExtUtils::Install::install($info->install_paths->install_map, $info->verbose, 1, $info->option('uninst'));
 				return;
 			},
 		},

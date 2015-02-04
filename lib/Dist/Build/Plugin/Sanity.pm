@@ -6,7 +6,6 @@ use warnings;
 use parent qw/Dist::Build::Role::Plugin Build::Graph::Role::Manipulator Build::Graph::Role::CommandProvider/;
 
 use Carp;
-use File::Copy 'copy';
 
 sub configure_commands {
 	my ($self, $commandset) = @_;
@@ -16,7 +15,8 @@ sub configure_commands {
 			'copy' => sub {
 				my $info   = shift;
 				my $source = $info->arguments->{source};
-				copy($source, $info->name) or croak "Could not copy: $!";
+				require File::Copy;
+				File::Copy::copy($source, $info->name) or croak "Could not copy: $!";
 				return;
 			},
 		},
