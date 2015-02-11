@@ -47,6 +47,7 @@ sub _match_plugin {
 			$self->{with}{$matcher}->($self->graph, $plugin);
 		}
 	}
+	return;
 }
 
 1;

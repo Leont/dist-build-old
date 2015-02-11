@@ -19,7 +19,7 @@ use Dist::Build::PluginLoader;
 
 sub load_meta {
 	my @files = @_;
-	my ($metafile) = grep { -e $_ } @files or croak "No META information provided\n";
+	my ($metafile) = grep { -e } @files or croak "No META information provided\n";
 	return CPAN::Meta->load_file($metafile, { lazy_validation => 0 });
 }
 
@@ -33,9 +33,9 @@ sub _modules_to_load {
 
 sub _parse_arguments {
 	my ($args, $env, $options) = @_;
-	my $bpl     = decode_json(read_file('_build/params'));
-	my $action  = @{$args} && $args->[0] =~ / \A \w+ \z /xms ? shift @{$args} : 'build';
-	my @env     = defined $env->{PERL_MB_OPT} ? split_like_shell($env->{PERL_MB_OPT}) : ();
+	my $bpl    = decode_json(read_file('_build/params'));
+	my $action = @{$args} && $args->[0] =~ / \A \w+ \z /xms ? shift @{$args} : 'build';
+	my @env    = defined $env->{PERL_MB_OPT} ? split_like_shell($env->{PERL_MB_OPT}) : ();
 	GetOptionsFromArray([ @{$bpl}, @env, @{$args} ], \my %opt, @{$options});
 	my $config = ExtUtils::Config->new(delete $opt{config});
 	return ($action, \%opt, $config);
@@ -66,7 +66,7 @@ sub Build {
 
 	my $graph = Build::Graph->load($pregraph);
 	$graph->loader->add_handler('Dist::Build::Role::Options', sub {
-		my ($graph, $module) = @_;
+		my (undef, $module) = @_;
 		push @options, $module->options;
 	});
 
@@ -89,11 +89,11 @@ sub Build_PL {
 
 	my $graph = Build::Graph->new(info_class => $info_class, loader_class => 'Dist::Build::PluginLoader');
 	$graph->loader->add_handler('Build::Graph::Role::CommandProvider' => sub {
-		my ($graph, $module) = @_;
+		my (undef, $module) = @_;
 		$module->configure_commands($graph->commandset);
 	});
 	$graph->loader->add_handler('Build::Graph::Role::Manipulator', sub {
-		my ($graph, $module) = @_;
+		my (undef, $module) = @_;
 		$module->manipulate_graph($graph);
 	});
 	$graph->loader->load($_) for _modules_to_load();

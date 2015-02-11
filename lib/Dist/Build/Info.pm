@@ -10,8 +10,8 @@ use Carp ();
 sub new {
 	my ($class, %args) = @_;
 	my $self = $class->SUPER::new(%args);
-	$self->{config} = $args{config} || Carp::croak('No config is given');
-	$self->{meta} = $args{meta} || Carp::croak('No meta is given');
+	$self->{config}  = $args{config}  || Carp::croak('No config is given');
+	$self->{meta}    = $args{meta}    || Carp::croak('No meta is given');
 	$self->{options} = $args{options} || {};
 	$self->{install_paths} = $args{install_paths} if $args{install_paths};
 	return $self;
