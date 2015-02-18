@@ -62,7 +62,7 @@ sub Build {
 	my $meta = load_meta('MYMETA.json', 'MYMETA.yml');
 
 	my $pregraph = decode_json(read_file(q{_build/graph}));
-	my @options  = qw/config=s% verbose:1/;
+	my @options  = qw/config=s% verbose:1 jobs=i/;
 
 	my $graph = Build::Graph->load($pregraph);
 	$graph->loader->add_handler('Dist::Build::Role::OptionProvider', sub {
