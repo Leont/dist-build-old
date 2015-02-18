@@ -40,8 +40,11 @@ sub verbose {
 sub install_paths {
 	my $self = shift;
 	return $self->{install_paths} ||= do {
+		require ExtUtils::Helpers;
+		my %options = %{ $self->{options} };
+		$_ = ExtUtils::Helpers::detildefy($_) for grep { defined } @options{qw/install_base destdir prefix/}, values %{ $options{install_path} };
 		require ExtUtils::InstallPaths;
-		return ExtUtils::InstallPaths->new(%{ $self->{options} }, config => $self->config, dist_name => $self->meta->name);
+		return ExtUtils::InstallPaths->new(%options, config => $self->config, dist_name => $self->meta->name);
 	};
 }
 
