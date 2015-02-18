@@ -23,7 +23,7 @@ sub configure_commands {
 
 sub manipulate_graph {
 	my ($self, $graph) = @_;
-	$graph->add_phony('install', actions => 'Install/install', dependencies => ['build']);
+	$graph->add_phony('install', action => [ 'Install/install' ], dependencies => ['build']);
 	return;
 }
 

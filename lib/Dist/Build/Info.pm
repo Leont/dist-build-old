@@ -41,7 +41,7 @@ sub install_paths {
 	my $self = shift;
 	return $self->{install_paths} ||= do {
 		require ExtUtils::InstallPaths;
-		return ExtUtils::InstallPaths->new(%{ $self->_options }, config => $self->config, dist_name => $self->meta_info->name);
+		return ExtUtils::InstallPaths->new(%{ $self->{options} }, config => $self->config, dist_name => $self->meta->name);
 	};
 }
 
