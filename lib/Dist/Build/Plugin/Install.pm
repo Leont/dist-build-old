@@ -28,7 +28,7 @@ sub manipulate_graph {
 }
 
 sub options {
-	return qw/uninst:1 dry_run:1/;
+	return qw/install_base=s install_path=s% installdirs=s destdir=s prefix=s uninst:1 dry_run:1/;
 }
 
 1;
