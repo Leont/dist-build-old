@@ -20,7 +20,7 @@ sub manipulate_graph {
 	my $pms = $graph->add_wildcard(dir => 'lib', pattern => '*.{pm,pod}', name => 'pm-files');
 	$graph->add_subst($pms,
 		subst  => sub { my $source = shift; catfile('blib', $source) },
-		action => sub { my ($target, $source) = @_; [ 'Core/copy', { source => $source } ] },
+		action => sub { my ($target, $source) = @_; [ 'Core/copy', $source ] },
 		name   => 'pm-blib',
 	);
 	return;

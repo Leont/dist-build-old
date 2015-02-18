@@ -14,7 +14,7 @@ sub configure_commands {
 		commands => {
 			'copy' => sub {
 				my $info   = shift;
-				my $source = $info->arguments->{source};
+				my ($source) = $info->arguments;
 				require File::Copy;
 				File::Copy::copy($source, $info->name) or croak "Could not copy: $!";
 				printf "cp %s %s\n", $source, $info->name if $info->verbose;
