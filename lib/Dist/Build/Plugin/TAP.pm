@@ -14,16 +14,16 @@ sub configure_commands {
 		module => __PACKAGE__,
 		commands => {
 			'tap-harness' => sub {
-				my $info   = shift;
-				require TAP::Harness::Env;
+				my $info  = shift;
+				my @files = $info->arguments;
 				my %test_args = (
 					(verbosity => $info->option('verbose')) x!! defined $info->option('verbose'),
 					(jobs => $info->option('jobs')) x!! defined $info->option('jobs'),
 					(color => 1) x !!-t STDOUT,
 					lib => [ map { rel2abs(catdir(qw/blib/, $_)) } qw/arch lib/ ],
 				);
-				my $tester = TAP::Harness::Env->create(\%test_args);
-				my @files  = $info->graph->unalias($info->arguments);
+				require TAP::Harness::Env;
+				my $tester  = TAP::Harness::Env->create(\%test_args);
 				my $results = $tester->runtests(@files);
 				croak "Errors in testing.  Cannot continue.\n" if $results->has_errors;
 			},
