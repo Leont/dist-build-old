@@ -17,6 +17,7 @@ sub configure_commands {
 				my $source = $info->arguments->{source};
 				require File::Copy;
 				File::Copy::copy($source, $info->name) or croak "Could not copy: $!";
+				printf "cp %s %s\n", $source, $info->name if $info->verbose;
 				return;
 			},
 		},
