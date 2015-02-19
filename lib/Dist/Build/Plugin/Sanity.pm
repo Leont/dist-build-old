@@ -3,7 +3,7 @@ package Dist::Build::Plugin::Sanity;
 use strict;
 use warnings;
 
-use parent qw/Dist::Build::Role::Plugin Build::Graph::Role::Manipulator Build::Graph::Role::CommandProvider/;
+use parent qw/Dist::Build::Role::Plugin Dist::Build::Role::Manipulator Build::Graph::Role::CommandProvider/;
 
 use Carp;
 

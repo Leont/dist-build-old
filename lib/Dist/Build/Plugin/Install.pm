@@ -3,7 +3,7 @@ package Dist::Build::Plugin::Install;
 use strict;
 use warnings;
 
-use parent qw/Dist::Build::Role::Plugin Build::Graph::Role::Manipulator Build::Graph::Role::CommandProvider Dist::Build::Role::OptionProvider/;
+use parent qw/Dist::Build::Role::Plugin Dist::Build::Role::Manipulator Build::Graph::Role::CommandProvider Dist::Build::Role::OptionProvider/;
 
 sub configure_commands {
 	my ($self, $commandset) = @_;

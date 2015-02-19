@@ -92,7 +92,7 @@ sub Build_PL {
 		my (undef, $module) = @_;
 		$module->configure_commands($graph->commandset);
 	});
-	$graph->loader->add_handler('Build::Graph::Role::Manipulator', sub {
+	$graph->loader->add_handler('Dist::Build::Role::Manipulator', sub {
 		my (undef, $module) = @_;
 		$module->manipulate_graph($graph);
 	});
