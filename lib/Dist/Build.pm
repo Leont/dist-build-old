@@ -15,8 +15,6 @@ use ExtUtils::Manifest 'maniread';
 use Getopt::Long qw/GetOptionsFromArray/;
 use JSON::PP 2 qw/encode_json decode_json/;
 
-use Dist::Build::PluginLoader;
-
 sub load_meta {
 	my @files = @_;
 	my ($metafile) = grep { -e } @files or croak "No META information provided\n";
@@ -65,7 +63,7 @@ sub Build {
 	my @options  = qw/config=s% verbose:1 jobs=i/;
 
 	my $graph = Build::Graph->load($pregraph);
-	$graph->loader->add_handler('Dist::Build::Role::OptionProvider', sub {
+	$graph->plugins->add_handler('Dist::Build::Role::OptionProvider', sub {
 		my (undef, $module) = @_;
 		push @options, $module->options;
 	});
@@ -87,8 +85,8 @@ sub Build_PL {
 	mkdir '_build' if not -d '_build';
 	write_file(qw{_build/params}, encode_json(\@args));
 
-	my $graph = Build::Graph->new(info_class => $info_class, loader_class => 'Dist::Build::PluginLoader');
-	$graph->loader->add_handler('Dist::Build::Role::Manipulator', sub {
+	my $graph = Build::Graph->new(info_class => $info_class);
+	$graph->plugins->add_handler('Dist::Build::Role::Manipulator', sub {
 		my ($name, $module) = @_;
 		$module->manipulate_graph($graph);
 	});
