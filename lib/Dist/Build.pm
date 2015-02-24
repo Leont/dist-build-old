@@ -24,7 +24,7 @@ sub load_meta {
 }
 
 #XXX: hardcoded for now.
-my @modules    = qw/-Sanity -CopyPM -TAP -Install/;
+my @modules    = qw/-Core -CopyPM -TAP -Install/;
 my $info_class = 'Dist::Build::Info';
 
 sub _modules_to_load {

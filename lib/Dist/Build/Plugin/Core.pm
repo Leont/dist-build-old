@@ -1,4 +1,4 @@
-package Dist::Build::Plugin::Sanity;
+package Dist::Build::Plugin::Core;
 
 use strict;
 use warnings;
