@@ -3,7 +3,7 @@ package Dist::Build::Plugin::CopyPM;
 use strict;
 use warnings;
 
-use parent qw/Dist::Build::Role::Plugin Dist::Build::Role::Manipulator/;
+use parent qw/Build::Graph::Role::Plugin Dist::Build::Role::Manipulator/;
 
 use File::Spec::Functions qw/catfile/;
 

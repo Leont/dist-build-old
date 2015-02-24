@@ -3,22 +3,17 @@ package Dist::Build::Plugin::Install;
 use strict;
 use warnings;
 
-use parent qw/Dist::Build::Role::Plugin Dist::Build::Role::Manipulator Build::Graph::Role::CommandProvider Dist::Build::Role::OptionProvider/;
+use parent qw/Dist::Build::Role::Manipulator Build::Graph::Role::CommandProvider Dist::Build::Role::OptionProvider/;
 
-sub configure_commands {
-	my ($self, $commandset) = @_;
-	$commandset->add('Install',
-		module => __PACKAGE__,
-		commands => {
-			'install' => sub {
-				my $info = shift;
-				require ExtUtils::Install;
-				ExtUtils::Install::install($info->install_paths->install_map, $info->verbose, 1, $info->option('uninst'));
-				return;
-			},
+sub _get_commands {
+	return {
+		'install' => sub {
+			my $info = shift;
+			require ExtUtils::Install;
+			ExtUtils::Install::install($info->install_paths->install_map, $info->verbose, 1, $info->option('uninst'));
+			return;
 		},
-	);
-	return;
+	};
 }
 
 sub manipulate_graph {

@@ -24,7 +24,7 @@ sub load_meta {
 }
 
 #XXX: hardcoded for now.
-my @modules    = qw/-Core -CopyPM -TAP -Install/;
+my @modules    = qw/Core CopyPM TAP Install/;
 my $info_class = 'Dist::Build::Info';
 
 sub _modules_to_load {
@@ -88,15 +88,11 @@ sub Build_PL {
 	write_file(qw{_build/params}, encode_json(\@args));
 
 	my $graph = Build::Graph->new(info_class => $info_class, loader_class => 'Dist::Build::PluginLoader');
-	$graph->loader->add_handler('Build::Graph::Role::CommandProvider' => sub {
-		my (undef, $module) = @_;
-		$module->configure_commands($graph->commandset);
-	});
 	$graph->loader->add_handler('Dist::Build::Role::Manipulator', sub {
-		my (undef, $module) = @_;
+		my ($name, $module) = @_;
 		$module->manipulate_graph($graph);
 	});
-	$graph->loader->load($_) for _modules_to_load();
+	$graph->load_plugin($_, "Dist::Build::Plugin::$_") for _modules_to_load();
 	my $manifest = maniread();
 	$graph->match(keys %{$manifest});
 

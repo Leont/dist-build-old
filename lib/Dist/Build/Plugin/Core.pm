@@ -3,32 +3,27 @@ package Dist::Build::Plugin::Core;
 use strict;
 use warnings;
 
-use parent qw/Dist::Build::Role::Plugin Dist::Build::Role::Manipulator Build::Graph::Role::CommandProvider/;
+use parent qw/Dist::Build::Role::Manipulator Build::Graph::Role::CommandProvider/;
 
 use Carp;
 
-sub configure_commands {
-	my ($self, $commandset) = @_;
-	$commandset->add('Core',
-		module => __PACKAGE__,
-		commands => {
-			'copy' => sub {
-				my $info   = shift;
-				my ($source) = $info->arguments;
-				my $target = $info->name;
+sub _get_commands {
+	return {
+		'copy' => sub {
+			my $info   = shift;
+			my ($source) = $info->arguments;
+			my $target = $info->name;
 
-				require File::Path;
-				require File::Basename;
-				File::Path::mkpath(File::Basename::dirname($target));
+			require File::Path;
+			require File::Basename;
+			File::Path::mkpath(File::Basename::dirname($target));
 
-				require File::Copy;
-				File::Copy::copy($source, $target) or croak "Could not copy: $!";
-				printf "cp %s %s\n", $source, $target if $info->verbose;
-				return;
-			},
+			require File::Copy;
+			File::Copy::copy($source, $target) or croak "Could not copy: $!";
+			printf "cp %s %s\n", $source, $target if $info->verbose;
+			return;
 		},
-	);
-	return;
+	};
 }
 
 sub manipulate_graph {

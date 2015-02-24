@@ -3,7 +3,7 @@ package Dist::Build::PluginLoader;
 use strict;
 use warnings;
 
-use parent 'Build::Graph::ClassLoader';
+use parent 'Build::Graph::Role::Loader';
 
 sub new {
 	my ($class, %arguments) = @_;
@@ -26,25 +26,23 @@ sub add_handler {
 }
 
 sub load {
-	my ($self, $plugin) = @_;
-	return $self->{loaded}{$plugin} ||= $self->_load_plugin($plugin);
-}
-
-sub _load_plugin {
-	my ($self, $plugin) = @_;
-	(my $module = $plugin) =~ s/ ^ - /Dist::Build::Plugin::/xms;
-	$self->SUPER::load($module);
-	$module->configure;
-	my $ret = $module->new(name => $plugin, graph => $self->graph);
-	$self->_match_plugin($ret);
-	return $ret;
+	my ($self, $module, %args) = @_;
+	my $name = $args{name};
+	return $self->{loaded}{$module} ||= do {
+		$module =~ s/ ^ - /Dist::Build::Plugin::/xms;
+		$self->load_module($module);
+		my $plugin = $module->new(%args);
+		$self->graph->plugins->add_plugin($name, $plugin);
+		$self->_match_plugin($name, $plugin);
+		$plugin;
+	}
 }
 
 sub _match_plugin {
-	my ($self, $plugin) = @_;
+	my ($self, $name, $plugin, %args) = @_;
 	for my $matcher (keys %{ $self->{with} }) {
 		if ($plugin->isa($matcher)) {
-			$self->{with}{$matcher}->($self->graph, $plugin);
+			$self->{with}{$matcher}->($name, $plugin, %args);
 		}
 	}
 	return;
