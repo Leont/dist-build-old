@@ -23,12 +23,23 @@ sub _get_commands {
 			printf "cp %s %s\n", $source, $target if $info->verbose;
 			return;
 		},
+		'rm-r' => sub {
+			my $info = shift;
+			my @files = $info->arguments;
+			require File::Path;
+			File::Path::rmtree(\@files, $info->verbose, 0);
+			return;
+		},
 	};
 }
 
 sub manipulate_graph {
 	my ($self, $graph) = @_;
 	$graph->add_phony('build');
+	$graph->add_named('clean-files', 'blib');
+	$graph->add_phony('clean', action => [ 'Core/rm-r', '$(clean-files)']);
+	$graph->add_named('realclean-files', qw/MYMETA.json MYMETA.yml Build _build/);
+	$graph->add_phony('realclean', action => [ 'Core/rm-r', '$(realclean-files)'], dependencies => [ 'clean']);
 	return;
 }
 
