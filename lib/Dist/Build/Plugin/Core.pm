@@ -36,9 +36,9 @@ sub _get_commands {
 sub manipulate_graph {
 	my ($self, $graph) = @_;
 	$graph->add_phony('build');
-	$graph->add_named('clean-files', 'blib');
+	$graph->add_variable('clean-files', 'blib');
 	$graph->add_phony('clean', action => [ 'Core/rm-r', '$(clean-files)']);
-	$graph->add_named('realclean-files', qw/MYMETA.json MYMETA.yml Build _build/);
+	$graph->add_variable('realclean-files', qw/MYMETA.json MYMETA.yml Build _build/);
 	$graph->add_phony('realclean', action => [ 'Core/rm-r', '$(realclean-files)'], dependencies => [ 'clean']);
 	return;
 }
