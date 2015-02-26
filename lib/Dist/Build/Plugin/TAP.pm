@@ -33,8 +33,8 @@ sub manipulate_graph {
 	my $name = $self->name;
 	$graph->add_wildcard(dir => 't', pattern => '*.t', name => 'test-files');
 	$graph->add_phony('test',
-		action       => [ 'TAP/tap-harness', '$(test-files)' ],
-		dependencies => [ 'build', '$(test-files)' ]
+		action       => [ 'TAP/tap-harness', '@(test-files)' ],
+		dependencies => [ 'build', '@(test-files)' ]
 	);
 	return;
 }

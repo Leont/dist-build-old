@@ -22,8 +22,8 @@ sub _get_commands {
 sub manipulate_graph {
 	my ($self, $graph) = @_;
 
-	$graph->add_phony('copy_pm', dependencies => ['$(pm-blib)']);
-	$graph->add_phony('copy_pl', dependencies => ['$(pl-blib)']);
+	$graph->add_phony('copy_pm', dependencies => ['@(pm-blib)']);
+	$graph->add_phony('copy_pl', dependencies => ['@(pl-blib)']);
 	$graph->get_node('build')->add_dependencies('copy_pm', 'copy_pl');
 
 	my $pms = $graph->add_wildcard(dir => 'lib', pattern => '*.{pm,pod}', name => 'pm-files');
