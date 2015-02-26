@@ -44,6 +44,25 @@ sub _get_commands {
 			File::Path::rmtree(\@files, $info->verbose, 0);
 			return;
 		},
+		'mkdir' => sub {
+			my $info = shift;
+			require File::Path;
+			File::Path::mkpath($info->name, $info->verbose);
+			return;
+		},
+		'touch' => sub {
+			my $info = shift;
+			my $target = $info->name;
+
+			require File::Basename;
+			my $dirname = File::Basename::dirname($target);
+			if (!-d $dirname) {
+				require File::Path;
+				File::Path::mkpath($dirname, $info->verbose);
+			}
+
+			open my $fh, '>', $target;
+		},
 	};
 }
 
