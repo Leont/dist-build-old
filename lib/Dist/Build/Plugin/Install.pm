@@ -10,7 +10,7 @@ sub _get_commands {
 		'install' => sub {
 			my $info = shift;
 			require ExtUtils::Install;
-			ExtUtils::Install::install($info->install_paths->install_map, $info->verbose, 1, $info->option('uninst'));
+			ExtUtils::Install::install($info->install_paths->install_map, $info->verbose, 0, $info->option('uninst'));
 			return;
 		},
 	};
