@@ -68,7 +68,11 @@ sub _get_commands {
 
 sub manipulate_graph {
 	my ($self, $graph) = @_;
-	$graph->add_phony('build');
+	my @exists = map { File::Spec->catdir('blib', $_, '.exists') } qw/lib arch script/;
+	$graph->add_file($_, action => [ 'Core/touch' ]) for @exists;
+	$graph->add_variable('exist-files', @exists);
+	$graph->add_phony('config', dependencies => [ '$(exist-files)' ]);
+	$graph->add_phony('build', dependencies => [ 'config' ]);
 	$graph->add_variable('clean-files', 'blib');
 	$graph->add_phony('clean', action => [ 'Core/rm-r', '$(clean-files)']);
 	$graph->add_variable('realclean-files', qw/MYMETA.json MYMETA.yml Build _build/);
