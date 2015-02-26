@@ -12,7 +12,7 @@ sub _get_commands {
 		'copy' => sub {
 			my $info   = shift;
 			my ($source) = $info->arguments;
-			my $target = $info->name;
+			my $target = $info->target;
 
 			if (-f $target) {
 				require File::Path;
@@ -47,12 +47,12 @@ sub _get_commands {
 		'mkdir' => sub {
 			my $info = shift;
 			require File::Path;
-			File::Path::mkpath($info->name, $info->verbose);
+			File::Path::mkpath($info->target, $info->verbose);
 			return;
 		},
 		'touch' => sub {
 			my $info = shift;
-			my $target = $info->name;
+			my $target = $info->target;
 
 			require File::Basename;
 			my $dirname = File::Basename::dirname($target);

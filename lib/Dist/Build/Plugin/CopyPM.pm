@@ -11,7 +11,7 @@ sub _get_commands {
 	return {
 		make_executable => sub {
 			my $info = shift;
-			my $target = $info->name;
+			my $target = $info->target;
 			require ExtUtils::Helpers;
 			ExtUtils::Helpers::make_executable($target);
 		},
