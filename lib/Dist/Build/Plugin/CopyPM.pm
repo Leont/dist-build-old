@@ -25,17 +25,15 @@ sub manipulate_graph {
 	$graph->add_phony('copy_pl', dependencies => ['@(pl-blib)']);
 	$graph->get_node('build')->add_dependencies('copy_pm', 'copy_pl');
 
-	my $pms = $graph->add_wildcard(dir => 'lib', pattern => '*.{pm,pod}', name => 'pm-files');
-	$graph->add_subst($pms,
+	my $pms = $graph->add_wildcard('pm-files', dir => 'lib', pattern => '*.{pm,pod}');
+	$graph->add_subst('pm-blib', $pms,
 		subst  => sub { my $source = shift; catfile('blib', $source) },
 		action => [ 'Core/copy', '%(verbose)', '$(target)', '$(source)' ],
-		name   => 'pm-blib',
 	);
-	my $pls = $graph->add_wildcard(dir => 'script', pattern => '*', name => 'pl-files');
-	$graph->add_subst($pls,
+	my $pls = $graph->add_wildcard('pl-files', dir => 'script', pattern => '*');
+	$graph->add_subst('pl-blib', $pls,
 		subst  => sub { my $source = shift; catfile('blib', $source) },
 		action => [ 'CopyPM/pl_to_blib', '%(verbose)', '$(target)', '$(source)' ],
-		name   => 'pl-blib',
 	);
 	return;
 }

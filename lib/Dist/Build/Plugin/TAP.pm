@@ -29,7 +29,7 @@ sub manipulate_graph {
 	my ($self, $graph) = @_;
 
 	my $name = $self->name;
-	$graph->add_wildcard(dir => 't', pattern => '*.t', name => 'test-files');
+	$graph->add_wildcard('test-files', dir => 't', pattern => '*.t');
 	$graph->add_phony('test',
 		action       => [ 'TAP/tap-harness', '%(verbose)', '@(test-files)' ],
 		dependencies => [ 'build', '@(test-files)' ]

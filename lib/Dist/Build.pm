@@ -22,7 +22,7 @@ sub load_meta {
 }
 
 #XXX: hardcoded for now.
-my @modules    = qw/Core CopyPM TAP Install/;
+my @modules = qw/Core CopyPM TAP Install/;
 
 sub _modules_to_load {
 	return @modules;
