@@ -14,13 +14,27 @@ sub _get_commands {
 			my ($source) = $info->arguments;
 			my $target = $info->name;
 
-			require File::Path;
-			require File::Basename;
-			File::Path::mkpath(File::Basename::dirname($target));
+			if (-f $target) {
+				require File::Path;
+				File::Path::rmtree($target, $info->verbose, 0);
+			}
+			else {
+				require File::Basename;
+				my $dirname = File::Basename::dirname($target);
+				if (!-d $dirname) {
+					require File::Path;
+					File::Path::mkpath($dirname, $info->verbose);
+				}
+			}
 
 			require File::Copy;
 			File::Copy::copy($source, $target) or croak "Could not copy: $!";
-			printf "cp %s %s\n", $source, $target if $info->verbose;
+			printf "cp %s %s\n", $source, $target;
+
+			my ($stat, $atime, $mtime) = (stat $source)[2,8,9];
+			utime $atime, $mtime, $target;
+			chmod $stat & 0444, $target;
+
 			return;
 		},
 		'rm-r' => sub {
