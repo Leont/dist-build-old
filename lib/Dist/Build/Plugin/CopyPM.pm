@@ -10,8 +10,7 @@ use File::Spec::Functions qw/catfile/;
 sub _get_commands {
 	return {
 		make_executable => sub {
-			my $info = shift;
-			my $target = $info->target;
+			my ($args, $target, $source) = @_;
 			require ExtUtils::Helpers;
 			ExtUtils::Helpers::make_executable($target);
 		},
@@ -29,13 +28,13 @@ sub manipulate_graph {
 	my $pms = $graph->add_wildcard(dir => 'lib', pattern => '*.{pm,pod}', name => 'pm-files');
 	$graph->add_subst($pms,
 		subst  => sub { my $source = shift; catfile('blib', $source) },
-		action => sub { my ($target, $source) = @_; [ 'Core/copy', $source ] },
+		action => [ 'Core/copy', '%(verbose)', '$(target)', '$(source)' ],
 		name   => 'pm-blib',
 	);
 	my $pls = $graph->add_wildcard(dir => 'script', pattern => '*', name => 'pl-files');
 	$graph->add_subst($pls,
 		subst  => sub { my $source = shift; catfile('blib', $source) },
-		action => sub { my ($target, $source) = @_; [ 'CopyPM/pl_to_blib', $source ] },
+		action => [ 'CopyPM/pl_to_blib', '%(verbose)', '$(target)', '$(source)' ],
 		name   => 'pl-blib',
 	);
 	return;

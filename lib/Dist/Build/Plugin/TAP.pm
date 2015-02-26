@@ -11,11 +11,9 @@ use File::Spec::Functions qw/catdir rel2abs/;
 sub _get_commands {
 	return {
 		'tap-harness' => sub {
-			my $info  = shift;
-			my @files = $info->arguments;
+			my ($args, @files) = @_;
 			my %test_args = (
-				(verbosity => $info->option('verbose')) x!! defined $info->option('verbose'),
-				(jobs => $info->option('jobs')) x!! defined $info->option('jobs'),
+				%{$args},
 				(color => 1) x !!-t STDOUT,
 				lib => [ map { rel2abs(catdir(qw/blib/, $_)) } qw/arch lib/ ],
 			);
@@ -33,7 +31,7 @@ sub manipulate_graph {
 	my $name = $self->name;
 	$graph->add_wildcard(dir => 't', pattern => '*.t', name => 'test-files');
 	$graph->add_phony('test',
-		action       => [ 'TAP/tap-harness', '@(test-files)' ],
+		action       => [ 'TAP/tap-harness', '%(verbose)', '@(test-files)' ],
 		dependencies => [ 'build', '@(test-files)' ]
 	);
 	return;

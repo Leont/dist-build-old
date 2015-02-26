@@ -80,7 +80,7 @@ sub _slurp { do { local (@ARGV,$/)=$_[0]; <> } }
 # build
 #--------------------------------------------------------------------------#
 
-if (1) {
+{
   ok( open2(my($in, $out), $^X, 'Build'), 'Could run Build' );
   my $output = do { local $/; <$in> };
   like( $output, qr{lib/Foo/Bar\.pm}, 'Build output looks correctly');

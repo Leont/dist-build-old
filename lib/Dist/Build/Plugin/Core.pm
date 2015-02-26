@@ -10,20 +10,18 @@ use Carp;
 sub _get_commands {
 	return {
 		'copy' => sub {
-			my $info   = shift;
-			my ($source) = $info->arguments;
-			my $target = $info->target;
+			my ($args, $target, $source) = @_;
 
 			if (-f $target) {
 				require File::Path;
-				File::Path::rmtree($target, $info->verbose, 0);
+				File::Path::rmtree($target, $args->{verbose}, 0);
 			}
 			else {
 				require File::Basename;
 				my $dirname = File::Basename::dirname($target);
 				if (!-d $dirname) {
 					require File::Path;
-					File::Path::mkpath($dirname, $info->verbose);
+					File::Path::mkpath($dirname, $args->{verbose});
 				}
 			}
 
@@ -38,27 +36,24 @@ sub _get_commands {
 			return;
 		},
 		'rm-r' => sub {
-			my $info = shift;
-			my @files = $info->arguments;
+			my ($args, @files) = @_;
 			require File::Path;
-			File::Path::rmtree(\@files, $info->verbose, 0);
+			File::Path::rmtree(\@files, $args->{verbose}, 0);
 			return;
 		},
 		'mkdir' => sub {
-			my $info = shift;
-			require File::Path;
-			File::Path::mkpath($info->target, $info->verbose);
+			my ($args, $target) = @_;
+			File::Path::mkpath($target, $args->{verbose});
 			return;
 		},
 		'touch' => sub {
-			my $info = shift;
-			my $target = $info->target;
+			my ($args, $target) = @_;
 
 			require File::Basename;
 			my $dirname = File::Basename::dirname($target);
 			if (!-d $dirname) {
 				require File::Path;
-				File::Path::mkpath($dirname, $info->verbose);
+				File::Path::mkpath($dirname, $args->{verbose});
 			}
 
 			open my $fh, '>', $target;
@@ -69,14 +64,14 @@ sub _get_commands {
 sub manipulate_graph {
 	my ($self, $graph) = @_;
 	my @exists = map { File::Spec->catdir('blib', $_, '.exists') } qw/lib arch script/;
-	$graph->add_file($_, action => [ 'Core/touch' ]) for @exists;
+	$graph->add_file($_, action => [ 'Core/touch', '%(verbose)', '$(target)' ]) for @exists;
 	$graph->add_variable('exist-files', @exists);
 	$graph->add_phony('config', dependencies => [ '@(exist-files)' ]);
 	$graph->add_phony('build', dependencies => [ 'config' ]);
 	$graph->add_variable('clean-files', 'blib');
-	$graph->add_phony('clean', action => [ 'Core/rm-r', '@(clean-files)']);
+	$graph->add_phony('clean', action => [ 'Core/rm-r', '%(verbose)', '@(clean-files)']);
 	$graph->add_variable('realclean-files', qw/MYMETA.json MYMETA.yml Build _build/);
-	$graph->add_phony('realclean', action => [ 'Core/rm-r', '@(realclean-files)'], dependencies => [ 'clean']);
+	$graph->add_phony('realclean', action => [ 'Core/rm-r', '%(verbose)', '@(realclean-files)'], dependencies => [ 'clean']);
 	return;
 }
 

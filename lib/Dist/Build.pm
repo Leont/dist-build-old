@@ -10,7 +10,7 @@ use Build::Graph;
 use Carp qw/croak carp/;
 use CPAN::Meta;
 use ExtUtils::Config;
-use ExtUtils::Helpers 0.007 qw/split_like_shell make_executable/;
+use ExtUtils::Helpers 0.007 qw/split_like_shell detildefy make_executable/;
 use ExtUtils::Manifest 'maniread';
 use Getopt::Long qw/GetOptionsFromArray/;
 use JSON::PP 2 qw/encode_json decode_json/;
@@ -23,7 +23,6 @@ sub load_meta {
 
 #XXX: hardcoded for now.
 my @modules    = qw/Core CopyPM TAP Install/;
-my $info_class = 'Dist::Build::Info';
 
 sub _modules_to_load {
 	return @modules;
@@ -60,7 +59,7 @@ sub Build {
 	my $meta = load_meta('MYMETA.json', 'MYMETA.yml');
 
 	my $pregraph = decode_json(read_file(q{_build/graph}));
-	my @options  = qw/config=s% verbose:1 jobs=i/;
+	my @options  = qw/config=s% verbose:1 jobs=i install_base=s install_path=s% installdirs=s destdir=s prefix=s/;
 
 	my $graph = Build::Graph->load($pregraph);
 	$graph->plugins->add_handler('Dist::Build::Role::OptionProvider', sub {
@@ -69,7 +68,12 @@ sub Build {
 	});
 
 	my ($action, $options, $config) = _parse_arguments($args, $env, \@options);
-	return $graph->run($action, options => $options, config => $config, meta => $meta);
+
+	$_ = detildefy($_) for grep { defined } @{$options}{qw/install_base destdir prefix/}, values %{ $options->{install_path} };
+	require ExtUtils::InstallPaths;
+	my $paths = ExtUtils::InstallPaths->new(%{$options}, config => $config, dist_name => $meta);
+
+	return $graph->run($action, %{$options}, config => $config, meta => $meta, install_paths => $paths);
 }
 
 sub Build_PL {
@@ -85,7 +89,7 @@ sub Build_PL {
 	mkdir '_build' if not -d '_build';
 	write_file(qw{_build/params}, encode_json(\@args));
 
-	my $graph = Build::Graph->new(info_class => $info_class);
+	my $graph = Build::Graph->new;
 	$graph->plugins->add_handler('Dist::Build::Role::Manipulator', sub {
 		my ($name, $module) = @_;
 		$module->manipulate_graph($graph);

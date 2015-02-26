@@ -8,9 +8,9 @@ use parent qw/Dist::Build::Role::Manipulator Build::Graph::Role::CommandProvider
 sub _get_commands {
 	return {
 		'install' => sub {
-			my $info = shift;
+			my $args = shift;
 			require ExtUtils::Install;
-			ExtUtils::Install::install($info->install_paths->install_map, $info->verbose, 0, $info->option('uninst'));
+			ExtUtils::Install::install($args->{install_paths}->install_map, $args->{verbose}, 0, $args->{uninst});
 			return;
 		},
 	};
@@ -18,12 +18,12 @@ sub _get_commands {
 
 sub manipulate_graph {
 	my ($self, $graph) = @_;
-	$graph->add_phony('install', action => [ 'Install/install' ], dependencies => ['build']);
+	$graph->add_phony('install', action => [ 'Install/install', '%(install_paths,verbose,uninst)' ], dependencies => ['build']);
 	return;
 }
 
 sub options {
-	return qw/install_base=s install_path=s% installdirs=s destdir=s prefix=s uninst:1 dry_run:1/;
+	return qw/uninst:1 dry_run:1/;
 }
 
 1;
