@@ -61,6 +61,15 @@ sub _get_commands {
 	};
 }
 
+sub _get_substs {
+	return {
+		'to-blib' => sub {
+			my $path = shift;
+			return File::Spec->catfile('blib', $path);
+		},
+	};
+}
+
 sub manipulate_graph {
 	my ($self, $graph) = @_;
 	my @exists = map { File::Spec->catdir('blib', $_, '.exists') } qw/lib arch script/;

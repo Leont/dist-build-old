@@ -27,12 +27,12 @@ sub manipulate_graph {
 
 	my $pms = $graph->add_wildcard('pm-files', dir => 'lib', pattern => '*.{pm,pod}');
 	$graph->add_subst('pm-blib', $pms,
-		subst  => sub { my $source = shift; catfile('blib', $source) },
+		subst  => [ 'Core/to-blib', '$(source)' ],
 		action => [ 'Core/copy', '%(verbose)', '$(target)', '$(source)' ],
 	);
 	my $pls = $graph->add_wildcard('pl-files', dir => 'script', pattern => '*');
 	$graph->add_subst('pl-blib', $pls,
-		subst  => sub { my $source = shift; catfile('blib', $source) },
+		subst  => [ 'Core/to-blib', '$(source)' ],
 		action => [ 'CopyPM/pl_to_blib', '%(verbose)', '$(target)', '$(source)' ],
 	);
 	return;
