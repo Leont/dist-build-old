@@ -2,7 +2,6 @@
 use strict;
 use warnings;
 use Config;
-use ExtUtils::CBuilder;
 use File::Spec::Functions 0 qw/catdir catfile/;
 use IPC::Open2;
 use Test::More 0.88;
@@ -24,22 +23,6 @@ $dist->add_file('script/simple', undent(<<'    ---'));
     #!perl
     use Foo::Bar;
     print Simple->VERSION . "\n";
-    ---
-my $has_compiler = 0;#ExtUtils::CBuilder->new->have_compiler();
-$dist->add_file('lib/Simple.xs', undent(<<'    ---')) if $has_compiler;
-    #define PERL_NO_GET_CONTEXT
-    #include "EXTERN.h"
-    #include "perl.h"
-    #include "XSUB.h"
-
-    MODULE = Simple                PACKAGE = Simple
-
-    const char*
-    foo()
-        CODE:
-        RETVAL = "Hello World!\n";
-        OUTPUT:
-        RETVAL
     ---
 
 $dist->regen;
@@ -118,17 +101,12 @@ sub _slurp { do { local (@ARGV,$/)=$_[0]; <> } }
   }
   ok( -d catdir(qw/blib lib auto share dist Foo-Bar/), 'sharedir has been made');
   ok( -f catfile(qw/blib lib auto share dist Foo-Bar file.txt/), 'sharedir file has been made');
-
-  if ($has_compiler) {
-    XSLoader::load('Simple');
-    is(Simple::foo(), "Hello World!\n", 'Can run XSub Simple::foo');
-  }
 }
 
 {
   ok( open2(my($in, $out), $^X, Build => 'install'), 'Could run Build install' );
   my $output = do { local $/; <$in> };
-  my $filename = catfile(qw/install lib perl5/, ($has_compiler? $Config{archname} : () ), qw/Foo Bar.pm/);
+  my $filename = catfile(qw/install lib perl5/, qw/Foo Bar.pm/);
   like($output, qr/Installing \Q$filename/, 'Build install output looks correctly');
 
   ok( -f $filename, 'Module is installed');
