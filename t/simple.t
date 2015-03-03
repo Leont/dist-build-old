@@ -42,7 +42,13 @@ sub _slurp { do { local (@ARGV,$/)=$_[0]; <> } }
 #--------------------------------------------------------------------------#
 
 {
-  is(system($^X, 'Build.PL', '--install_base=install'), 0, 'Ran Build.PL') or BAIL_OUT("Couldn't run Build.PL");
+  ok(my $pid = open2(my ($in, $out), $^X, 'Build.PL', '--install_base=install'), 'Running Build.PL') or BAIL_OUT("Couldn't run Build.PL");
+  my $output = do { local $/;  <$in> };
+
+  is(waitpid($pid, 0), $pid, 'Ran Build.PL successfully');
+  is($?, 0, 'Build returned 0');
+  like($output, qr/Creating new 'Build' script for 'Foo-Bar' version '0.001'/, 'Output as expected');
+
   ok( -f 'Build', "Build created" );
   if ($^O eq 'MSWin32') {
     ok( -f 'Build.bat', 'Build is executable');
@@ -64,8 +70,10 @@ sub _slurp { do { local (@ARGV,$/)=$_[0]; <> } }
 #--------------------------------------------------------------------------#
 
 {
-  ok( open2(my($in, $out), $^X, 'Build'), 'Could run Build' );
+  ok( my $pid = open2(my($in, $out), $^X, 'Build'), 'Can run Build' );
   my $output = do { local $/; <$in> };
+  is( waitpid($pid, 0), $pid, 'Could run Build');
+  is($?, 0, 'Build returned 0');
   like( $output, qr{lib/Foo/Bar\.pm}, 'Build output looks correctly');
   ok( -d 'blib',        "created blib" );
   ok( -d 'blib/lib',    "created blib/lib" );
