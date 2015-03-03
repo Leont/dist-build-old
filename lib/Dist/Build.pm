@@ -22,7 +22,7 @@ sub load_meta {
 }
 
 #XXX: hardcoded for now.
-my @modules = qw/Core CopyPM TAP Install/;
+my @modules = qw/Core CopyPM TAP Install DistShare/;
 
 sub _modules_to_load {
 	return @modules;
@@ -90,6 +90,7 @@ sub Build_PL {
 	write_file(qw{_build/params}, encode_json(\@args));
 
 	my $graph = Build::Graph->new;
+	$graph->add_variable('distname', $meta->name);
 	$graph->plugins->add_handler('Dist::Build::Role::Manipulator', sub {
 		my ($name, $module) = @_;
 		$module->manipulate_graph($graph);

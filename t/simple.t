@@ -59,7 +59,7 @@ sub _slurp { do { local (@ARGV,$/)=$_[0]; <> } }
 #--------------------------------------------------------------------------#
 
 {
-  is(system($^X, 'Build.PL', '--install_base=install'), 0, 'Ran Build.PL') or BAIL_OUT;
+  is(system($^X, 'Build.PL', '--install_base=install'), 0, 'Ran Build.PL') or BAIL_OUT("Couldn't run Build.PL");
   ok( -f 'Build', "Build created" );
   if ($^O eq 'MSWin32') {
     ok( -f 'Build.bat', 'Build is executable');
@@ -110,7 +110,6 @@ sub _slurp { do { local (@ARGV,$/)=$_[0]; <> } }
     like( $line, qr{\A$interpreter}, "blib/script/simple has shebang line with \$^X" );
   }
 
-  if (0) {
   require blib;
   blib->import;
   if (eval { require File::ShareDir }) {
@@ -123,7 +122,6 @@ sub _slurp { do { local (@ARGV,$/)=$_[0]; <> } }
   if ($has_compiler) {
     XSLoader::load('Simple');
     is(Simple::foo(), "Hello World!\n", 'Can run XSub Simple::foo');
-  }
   }
 }
 
