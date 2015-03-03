@@ -9,7 +9,6 @@ our @EXPORT = qw/Build Build_PL/;
 use Build::Graph;
 use Carp qw/croak carp/;
 use CPAN::Meta;
-use ExtUtils::Config;
 use ExtUtils::Helpers 0.007 qw/split_like_shell detildefy make_executable/;
 use ExtUtils::Manifest 'maniread';
 use Getopt::Long qw/GetOptionsFromArray/;
@@ -34,8 +33,9 @@ sub _parse_arguments {
 	my $action = @{$args} && $args->[0] =~ / \A \w+ \z /xms ? shift @{$args} : 'build';
 	my @env    = defined $env->{PERL_MB_OPT} ? split_like_shell($env->{PERL_MB_OPT}) : ();
 	GetOptionsFromArray([ @{$bpl}, @env, @{$args} ], \my %opt, @{$options});
-	my $config = ExtUtils::Config->new(delete $opt{config});
-	return ($action, \%opt, $config);
+	require ExtUtils::Config;
+	$opt{config} = ExtUtils::Config->new($opt{config});
+	return ($action, \%opt);
 }
 
 sub read_file {
@@ -67,13 +67,13 @@ sub Build {
 		push @options, $module->options;
 	});
 
-	my ($action, $options, $config) = _parse_arguments($args, $env, \@options);
+	my ($action, $options) = _parse_arguments($args, $env, \@options);
 
 	$_ = detildefy($_) for grep { defined } @{$options}{qw/install_base destdir prefix/}, values %{ $options->{install_path} };
 	require ExtUtils::InstallPaths;
-	my $paths = ExtUtils::InstallPaths->new(%{$options}, config => $config, dist_name => $meta);
+	my $paths = ExtUtils::InstallPaths->new(%{$options}, dist_name => $meta);
 
-	return $graph->run($action, %{$options}, config => $config, meta => $meta, install_paths => $paths);
+	return $graph->run($action, %{$options}, meta => $meta, install_paths => $paths);
 }
 
 sub Build_PL {
