@@ -5,16 +5,21 @@ use warnings;
 
 use parent qw/Dist::Build::Role::Plugin/;
 
-use File::Spec::Functions qw/catfile/;
-
 sub _get_commands {
+	my ($self, %args) = @_;
+	my $graph = $self->graph;
 	return {
 		make_executable => sub {
 			my ($args, $target, $source) = @_;
 			require ExtUtils::Helpers;
 			ExtUtils::Helpers::make_executable($target);
 		},
-		pl_to_blib => [ 'Core/copy', 'CopyPM/make_executable' ],
+		pl_to_blib => sub {
+			my ($opts, $target, $source) = @_;
+			$graph->run_command('Core/copy', $opts, $target, $source);
+			$graph->run_command('CopyPM/make_executable', $opts, $target);
+			return;
+		},
 	};
 }
 
