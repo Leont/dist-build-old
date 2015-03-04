@@ -89,11 +89,13 @@ sub Build_PL {
 	mkdir '_build' if not -d '_build';
 	write_file(qw{_build/params}, encode_json(\@args));
 
+	my @meta_pieces;
 	my $graph = Build::Graph->new;
 	$graph->add_variable('distname', $meta->name);
 	$graph->plugins->add_handler(sub {
 		my ($module) = @_;
 		$module->manipulate_graph($graph);
+		push @meta_pieces, $module->meta_merge;
 	});
 	$graph->load_plugin($_, "Dist::Build::Plugin::$_") for _modules_to_load();
 	my $manifest = maniread();
@@ -101,6 +103,12 @@ sub Build_PL {
 
 	write_file('_build/graph', JSON::PP->new->canonical->pretty->encode($graph->to_hashref));
 
+	if (@meta_pieces) {
+		require CPAN::Meta::Merge;
+		my $merged = CPAN::Meta::Merge->new(default_version => 2)->merge($meta->as_struct, @meta_pieces);
+		$merged->{dynamic_config} = 0;
+		$meta = CPAN::Meta->create($merged, { lazy_validation => 0 });
+	}
 	$meta->save('MYMETA.json');
 	$meta->save('MYMETA.yml', { version => 1.4 });
 	$graph->match(qw/MYMETA.json MYMETA.yml/);

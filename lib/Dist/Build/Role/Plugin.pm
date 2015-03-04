@@ -11,6 +11,10 @@ sub options {
 	return;
 }
 
+sub meta_merge {
+	return;
+}
+
 #ABSTRACT: Plugin role for Dist::Build
 
 1;
