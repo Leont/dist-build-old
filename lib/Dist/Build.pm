@@ -62,7 +62,7 @@ sub Build {
 	my @options  = qw/config=s% verbose:1 jobs=i install_base=s install_path=s% installdirs=s destdir=s prefix=s/;
 
 	my $graph = Build::Graph->load($pregraph);
-	$graph->plugins->add_handler(sub {
+	$graph->add_plugin_handler(sub {
 		my ($module) = @_;
 		push @options, $module->options;
 	});
@@ -92,7 +92,7 @@ sub Build_PL {
 	my @meta_pieces;
 	my $graph = Build::Graph->new;
 	$graph->add_variable('distname', $meta->name);
-	$graph->plugins->add_handler(sub {
+	$graph->add_plugin_handler(sub {
 		my ($module) = @_;
 		$module->manipulate_graph($graph);
 		push @meta_pieces, $module->meta_merge;
