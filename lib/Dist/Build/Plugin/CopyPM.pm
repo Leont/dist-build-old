@@ -10,13 +10,13 @@ sub _get_commands {
 	my $graph = $self->graph;
 	return {
 		make_executable => sub {
-			my ($args, $target, $source) = @_;
+			my ($args, $target) = @_;
 			require ExtUtils::Helpers;
 			ExtUtils::Helpers::make_executable($target);
 		},
 		pl_to_blib => sub {
-			my ($opts, $target, $source) = @_;
-			$graph->run_command('Core/copy', $opts, $target, $source);
+			my ($opts, $source, $target) = @_;
+			$graph->run_command('Core/copy', $opts, $source, $target);
 			$graph->run_command('CopyPM/make_executable', $opts, $target);
 			return;
 		},
@@ -33,12 +33,12 @@ sub manipulate_graph {
 	my $pms = $graph->add_wildcard('pm-files', dir => 'lib', pattern => '*.{pm,pod}');
 	$graph->add_subst('pm-blib', $pms,
 		subst  => [ 'Core/to-blib', '$(source)' ],
-		action => [ 'Core/copy', '%(verbose)', '$(target)', '$(source)' ],
+		action => [ 'Core/copy', '%(verbose)', '$(source)', '$(target)' ],
 	);
 	my $pls = $graph->add_wildcard('pl-files', dir => 'script', pattern => '*');
 	$graph->add_subst('pl-blib', $pls,
 		subst  => [ 'Core/to-blib', '$(source)' ],
-		action => [ 'CopyPM/pl_to_blib', '%(verbose)', '$(target)', '$(source)' ],
+		action => [ 'CopyPM/pl_to_blib', '%(verbose)', '$(source)', '$(target)' ],
 	);
 	return;
 }

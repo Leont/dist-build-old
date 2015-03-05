@@ -29,7 +29,7 @@ sub manipulate_graph {
 	my $shared = $graph->add_wildcard('dist-share-source', dir => 'share', pattern => '*');
 	$graph->add_subst('dist-share', $shared,
 		subst  => [ 'DistShare/to-share', '$(source)', '@(distname)' ],
-		action => [ 'Core/copy', '%(verbose)', '$(target)', '$(source)' ],
+		action => [ 'Core/copy', '%(verbose)', '$(source)', '$(target)' ],
 	);
 	return;
 }

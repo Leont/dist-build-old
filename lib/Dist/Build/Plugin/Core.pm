@@ -10,7 +10,7 @@ use Carp;
 sub _get_commands {
 	return {
 		'copy' => sub {
-			my ($args, $target, $source) = @_;
+			my ($args, $source, $target) = @_;
 
 			if (-f $target) {
 				require File::Path;
