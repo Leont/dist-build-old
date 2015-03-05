@@ -29,9 +29,9 @@ sub _get_commands {
 			File::Copy::copy($source, $target) or croak "Could not copy: $!";
 			printf "cp %s %s\n", $source, $target;
 
-			my ($stat, $atime, $mtime) = (stat $source)[2,8,9];
+			my ($atime, $mtime) = (stat $source)[8,9];
 			utime $atime, $mtime, $target;
-			chmod $stat & 0444, $target;
+			chmod 0444, $target;
 
 			return;
 		},
@@ -56,7 +56,8 @@ sub _get_commands {
 				File::Path::mkpath($dirname, $args->{verbose});
 			}
 
-			open my $fh, '>', $target;
+			open my $fh, '>', $target or croak "Could not create $target: $!";
+			close $fh or croak "Could not create $target: $!";
 		},
 	};
 }

@@ -52,7 +52,7 @@ sub write_file {
 	my ($filename, $content) = @_;
 	$filename = catfile(@{$filename}) if ref $filename;
 	open my $fh, '>:raw', $filename or croak "Could not open $filename: $!";
-	print $fh $content or croak "Could not write $filename: $!";
+	print {$fh} $content or croak "Could not write $filename: $!";
 	close $fh or croak "Could not write $filename: $!";
 	return;
 }
