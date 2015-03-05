@@ -26,8 +26,8 @@ sub manipulate_graph {
 	$graph->add_phony('distshare', dependencies => ['@(dist-share)']);
 	$graph->get_node('build')->add_dependencies('distshare');
 
-	my $shared = $graph->add_wildcard('dist-share-source', dir => 'share', pattern => '*');
-	$graph->add_subst('dist-share', $shared,
+	$graph->add_wildcard('dist-share-source', dir => 'share', pattern => '*');
+	$graph->add_subst('dist-share', 'dist-share-source',
 		subst  => [ 'DistShare/to-share', '$(source)', '@(distname)' ],
 		action => [ 'Core/copy', '%(verbose)', '$(source)', '$(target)' ],
 	);
