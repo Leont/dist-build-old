@@ -11,6 +11,7 @@ use Carp qw/croak carp/;
 use CPAN::Meta;
 use ExtUtils::Helpers 0.007 qw/split_like_shell detildefy make_executable/;
 use ExtUtils::Manifest 'maniread';
+use File::Spec::Functions 'catfile';
 use Getopt::Long qw/GetOptionsFromArray/;
 use JSON::PP 2 qw/encode_json decode_json/;
 
@@ -29,7 +30,7 @@ sub _modules_to_load {
 
 sub _parse_arguments {
 	my ($args, $env, $options) = @_;
-	my $bpl    = decode_json(read_file('_build/params'));
+	my $bpl    = decode_json(read_file([qw/_build params/]));
 	my $action = @{$args} && $args->[0] =~ / \A \w+ \z /xms ? shift @{$args} : 'build';
 	my @env    = defined $env->{PERL_MB_OPT} ? split_like_shell($env->{PERL_MB_OPT}) : ();
 	GetOptionsFromArray([ @{$bpl}, @env, @{$args} ], \my %opt, @{$options});
@@ -40,6 +41,7 @@ sub _parse_arguments {
 
 sub read_file {
 	my $filename = shift;
+	$filename = catfile(@{$filename}) if ref $filename;
 	open my $fh, '<:raw', $filename or croak "Could not open $filename: $!";
 	my $ret = do { local $/; <$fh> };
 	close $fh or croak "Could not read $filename: $!";
@@ -48,6 +50,7 @@ sub read_file {
 
 sub write_file {
 	my ($filename, $content) = @_;
+	$filename = catfile(@{$filename}) if ref $filename;
 	open my $fh, '>:raw', $filename or croak "Could not open $filename: $!";
 	print $fh $content or croak "Could not write $filename: $!";
 	close $fh or croak "Could not write $filename: $!";
@@ -58,7 +61,7 @@ sub Build {
 	my ($args, $env) = @_;
 	my $meta = load_meta('MYMETA.json', 'MYMETA.yml');
 
-	my $pregraph = decode_json(read_file(q{_build/graph}));
+	my $pregraph = decode_json(read_file([qw/_build graph/]));
 	my @options  = qw/config=s% verbose:1 jobs=i install_base=s install_path=s% installdirs=s destdir=s prefix=s/;
 
 	my $graph = Build::Graph->load($pregraph);
@@ -87,7 +90,7 @@ sub Build_PL {
 	make_executable('Build');
 
 	mkdir '_build' if not -d '_build';
-	write_file(qw{_build/params}, encode_json(\@args));
+	write_file([qw/_build params/], encode_json(\@args));
 
 	my @meta_pieces;
 	my $graph = Build::Graph->new;
@@ -101,7 +104,7 @@ sub Build_PL {
 	my $manifest = maniread();
 	$graph->match(keys %{$manifest});
 
-	write_file('_build/graph', JSON::PP->new->canonical->pretty->encode($graph->to_hashref));
+	write_file([qw/_build graph/], JSON::PP->new->canonical->pretty->encode($graph->to_hashref));
 
 	if (@meta_pieces) {
 		require CPAN::Meta::Merge;
