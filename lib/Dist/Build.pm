@@ -61,9 +61,8 @@ sub Build {
 	my ($args, $env) = @_;
 	my $meta = load_meta('MYMETA.json', 'MYMETA.yml');
 
-	my $pregraph = decode_json(read_file([qw/_build graph/]));
 	my @options  = qw/config=s% verbose:1 jobs=i install_base=s install_path=s% installdirs=s destdir=s prefix=s/;
-
+	my $pregraph = decode_json(read_file([qw/_build graph/]));
 	my $graph = Build::Graph->load($pregraph);
 	$graph->add_plugin_handler(sub {
 		my ($module) = @_;
@@ -74,9 +73,9 @@ sub Build {
 
 	$_ = detildefy($_) for grep { defined } @{$options}{qw/install_base destdir prefix/}, values %{ $options->{install_path} };
 	require ExtUtils::InstallPaths;
-	my $paths = ExtUtils::InstallPaths->new(%{$options}, dist_name => $meta);
+	$options->{install_paths} = ExtUtils::InstallPaths->new(%{$options}, dist_name => $meta->name);
 
-	return $graph->run($action, %{$options}, meta => $meta, install_paths => $paths);
+	return $graph->run($action, %{$options}, meta => $meta);
 }
 
 sub Build_PL {
