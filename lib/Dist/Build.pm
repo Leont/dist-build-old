@@ -28,12 +28,13 @@ sub _modules_to_load {
 	return @modules;
 }
 
-sub _parse_arguments {
-	my ($args, $env, $options) = @_;
-	my $bpl    = decode_json(read_file([qw/_build params/]));
+sub parse_arguments {
+	my ($args, $options) = @_;
+	my ($bpl, $env) = @{ decode_json(read_file([qw/_build params/])) };
 	my $action = @{$args} && $args->[0] =~ / \A \w+ \z /xms ? shift @{$args} : 'build';
-	my @env    = defined $env->{PERL_MB_OPT} ? split_like_shell($env->{PERL_MB_OPT}) : ();
-	GetOptionsFromArray([ @{$bpl}, @env, @{$args} ], \my %opt, @{$options});
+	my %opt;
+	GetOptionsFromArray($_, \%opt, @{$options}) for $bpl, $env, $args;
+	$_ = detildefy($_) for grep { defined } @opt{qw/install_base destdir prefix/}, values %{ $opt{install_path} };
 	require ExtUtils::Config;
 	$opt{config} = ExtUtils::Config->new($opt{config});
 	return ($action, \%opt);
@@ -69,9 +70,8 @@ sub Build {
 		push @options, $module->options;
 	});
 
-	my ($action, $options) = _parse_arguments($args, $env, \@options);
+	my ($action, $options) = parse_arguments($args, \@options);
 
-	$_ = detildefy($_) for grep { defined } @{$options}{qw/install_base destdir prefix/}, values %{ $options->{install_path} };
 	require ExtUtils::InstallPaths;
 	$options->{install_paths} = ExtUtils::InstallPaths->new(%{$options}, dist_name => $meta->name);
 
@@ -89,7 +89,8 @@ sub Build_PL {
 	make_executable('Build');
 
 	mkdir '_build' if not -d '_build';
-	write_file([qw/_build params/], encode_json(\@args));
+	my @env = defined $ENV{PERL_MB_OPT} ? split_like_shell($ENV{PERL_MB_OPT}) : ();
+	write_file([qw/_build params/], encode_json([ \@args, \@env ]));
 
 	my @meta_pieces;
 	my $graph = Build::Graph->new;
