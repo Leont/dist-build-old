@@ -88,10 +88,6 @@ sub Build_PL {
 	write_file('Build', "#!perl\nuse lib '$dir';\nuse Dist::Build;\nBuild(\\\@ARGV, \\\%ENV);\n");
 	make_executable('Build');
 
-	mkdir '_build' if not -d '_build';
-	my @env = defined $ENV{PERL_MB_OPT} ? split_like_shell($ENV{PERL_MB_OPT}) : ();
-	write_file([qw/_build params/], encode_json([ \@args, \@env ]));
-
 	my @meta_pieces;
 	my $graph = Build::Graph->new;
 	$graph->add_variable('distname', $meta->name);
@@ -101,20 +97,21 @@ sub Build_PL {
 		push @meta_pieces, $module->meta_merge;
 	});
 	$graph->load_plugin($_, "Dist::Build::Plugin::$_") for _modules_to_load();
-	my $manifest = maniread();
-	$graph->match(keys %{$manifest});
+	$graph->match(keys %{ maniread() });
 
+	mkdir '_build' if not -d '_build';
 	write_file([qw/_build graph/], JSON::PP->new->canonical->pretty->encode($graph->to_hashref));
+	my @env = defined $ENV{PERL_MB_OPT} ? split_like_shell($ENV{PERL_MB_OPT}) : ();
+	write_file([qw/_build params/], encode_json([ \@args, \@env ]));
 
 	if (@meta_pieces) {
 		require CPAN::Meta::Merge;
-		my $merged = CPAN::Meta::Merge->new(default_version => 2)->merge($meta->as_struct, @meta_pieces);
+		my $merged = CPAN::Meta::Merge->new(default_version => 2)->merge($meta, @meta_pieces);
 		$merged->{dynamic_config} = 0;
 		$meta = CPAN::Meta->create($merged, { lazy_validation => 0 });
 	}
 	$meta->save('MYMETA.json');
 	$meta->save('MYMETA.yml', { version => 1.4 });
-	$graph->match(qw/MYMETA.json MYMETA.yml/);
 	return;
 }
 
