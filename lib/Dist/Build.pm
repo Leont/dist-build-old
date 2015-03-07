@@ -31,7 +31,7 @@ sub _modules_to_load {
 sub parse_arguments {
 	my ($args, $options) = @_;
 	my ($bpl, $env) = @{ decode_json(read_file([qw/_build params/])) };
-	my $action = @{$args} && $args->[0] =~ / \A \w+ \z /xms ? shift @{$args} : 'build';
+	my $action = @{$args} && $args->[0] !~ / \A -- /xm ? shift @{$args} : 'build';
 	my %opt;
 	GetOptionsFromArray($_, \%opt, @{$options}) for $bpl, $env, $args;
 	$_ = detildefy($_) for grep { defined } @opt{qw/install_base destdir prefix/}, values %{ $opt{install_path} };
