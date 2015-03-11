@@ -79,7 +79,7 @@ sub Build {
 }
 
 sub Build_PL {
-	my @args = @_;
+	my ($args, $env) = @_;
 
 	my $meta = load_meta('META.json', 'META.yml');
 
@@ -101,8 +101,8 @@ sub Build_PL {
 
 	mkdir '_build' if not -d '_build';
 	write_file([qw/_build graph/], JSON::PP->new->canonical->pretty->encode($graph->to_hashref));
-	my @env = defined $ENV{PERL_MB_OPT} ? split_like_shell($ENV{PERL_MB_OPT}) : ();
-	write_file([qw/_build params/], encode_json([ \@args, \@env ]));
+	my @env = defined $env->{PERL_MB_OPT} ? split_like_shell($env->{PERL_MB_OPT}) : ();
+	write_file([qw/_build params/], encode_json([ $args, \@env ]));
 
 	if (@meta_pieces) {
 		require CPAN::Meta::Merge;

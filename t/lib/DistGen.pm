@@ -108,7 +108,7 @@ sub _gen_default_filedata {
 
   $self->$add_unless('Build.PL', undent(<<"      ---"));
       use Dist::Build;
-      Build_PL(\@ARGV);
+      Build_PL(\\\@ARGV, \\\%ENV);
       ---
 
   my $module_filename =
