@@ -90,10 +90,9 @@ sub Build_PL {
 
 	my @meta_pieces;
 	my $graph = Build::Graph->new;
-	$graph->add_variable('distname', $meta->name);
 	$graph->add_plugin_handler(sub {
 		my ($module) = @_;
-		$module->manipulate_graph($graph);
+		$module->manipulate_graph($graph, $meta);
 		push @meta_pieces, $module->meta_merge;
 	});
 	$graph->load_plugin($_, "Dist::Build::Plugin::$_") for _modules_to_load();
