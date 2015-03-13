@@ -13,10 +13,11 @@ sub _get_commands {
 		'tap-harness' => sub {
 			my ($args, @files) = @_;
 			my %test_args = (
-				%{$args},
 				(color => 1) x !!-t STDOUT,
-				lib => [ map { rel2abs(catdir(qw/blib/, $_)) } qw/arch lib/ ],
+				%{$args},
+				lib => [ map { rel2abs(catdir('blib', $_)) } qw/arch lib/ ],
 			);
+			$test_args{verbosity} = $test_args{verbose} if exists $test_args{verbose};
 			require TAP::Harness::Env;
 			my $tester  = TAP::Harness::Env->create(\%test_args);
 			my $results = $tester->runtests(@files);
@@ -31,7 +32,7 @@ sub manipulate_graph {
 	my $name = $self->name;
 	$graph->add_wildcard('test-files', dir => 't', pattern => '*.t');
 	$graph->add_phony('test',
-		action       => [ 'TAP/tap-harness', '%(verbose)', '@(test-files)' ],
+		action       => [ 'TAP/tap-harness', '%(verbose,jobs)', '@(test-files)' ],
 		dependencies => [ 'build', '@(test-files)' ]
 	);
 	return;
