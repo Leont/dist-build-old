@@ -96,7 +96,7 @@ sub Build_PL {
 		push @meta_pieces, $module->meta_merge;
 	});
 	$graph->load_plugin($_, "Dist::Build::Plugin::$_") for _modules_to_load();
-	$graph->match(keys %{ maniread() });
+	$graph->match(sort keys %{ maniread() });
 
 	mkdir '_build' if not -d '_build';
 	write_file([qw/_build graph/], JSON::PP->new->canonical->pretty->encode($graph->to_hashref));
