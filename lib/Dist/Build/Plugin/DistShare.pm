@@ -19,14 +19,13 @@ sub get_substs {
 sub manipulate_graph {
 	my ($self, $graph, $meta) = @_;
 
-	$graph->add_phony('distshare', dependencies => ['@(dist-share)']);
-	$graph->get_node('build')->add_dependencies('distshare');
-
 	$graph->add_wildcard('dist-share-source', dir => 'share', pattern => '*');
 	$graph->add_subst('dist-share', 'dist-share-source',
 		subst  => [ 'DistShare/to-share', '$(source)', $meta->name ],
 		action => [ 'Core/copy', '%(verbose)', '$(source)', '$(target)' ],
 	);
+	$graph->add_phony('distshare', dependencies => ['@(dist-share)'], add_to => 'build-elements');
+
 	return;
 }
 

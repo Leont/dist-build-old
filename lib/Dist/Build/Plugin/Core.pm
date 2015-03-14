@@ -77,7 +77,8 @@ sub manipulate_graph {
 	$graph->add_file($_, action => [ 'Core/touch', '%(verbose)', '$(target)' ]) for @exists;
 	$graph->add_variable('exist-files', @exists);
 	$graph->add_phony('config', dependencies => [ '@(exist-files)' ]);
-	$graph->add_phony('build', dependencies => [ 'config' ]);
+	$graph->add_variable('build-elements', 'config');
+	$graph->add_phony('build', dependencies => [ '@(build-elements)' ]);
 	$graph->add_variable('clean-files', 'blib');
 	$graph->add_phony('clean', action => [ 'Core/rm-r', '%(verbose)', '@(clean-files)']);
 	$graph->add_variable('realclean-files', qw/MYMETA.json MYMETA.yml Build _build/);
