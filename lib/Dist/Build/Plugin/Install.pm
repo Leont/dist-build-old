@@ -5,7 +5,7 @@ use warnings;
 
 use parent qw/Dist::Build::Role::Plugin/;
 
-sub _get_commands {
+sub get_commands {
 	return {
 		'install' => sub {
 			my $args = shift;

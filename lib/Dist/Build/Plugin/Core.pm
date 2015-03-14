@@ -7,7 +7,7 @@ use parent qw/Dist::Build::Role::Plugin/;
 
 use Carp;
 
-sub _get_commands {
+sub get_commands {
 	return {
 		'copy' => sub {
 			my ($args, $source, $target) = @_;
@@ -62,7 +62,7 @@ sub _get_commands {
 	};
 }
 
-sub _get_substs {
+sub get_substs {
 	return {
 		'to-blib' => sub {
 			my $path = shift;

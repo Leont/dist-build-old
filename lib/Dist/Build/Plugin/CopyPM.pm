@@ -5,7 +5,7 @@ use warnings;
 
 use parent qw/Dist::Build::Role::Plugin/;
 
-sub _get_commands {
+sub get_commands {
 	my ($self, %args) = @_;
 	my $graph = $self->graph;
 	return {
