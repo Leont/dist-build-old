@@ -7,10 +7,6 @@ use parent qw/Dist::Build::Role::Plugin/;
 
 use File::Spec::Functions qw/catfile abs2rel/;
 
-sub _get_commands {
-	return {};
-}
-
 sub _get_substs {
 	return {
 		'to-share' => sub {
