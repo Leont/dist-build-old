@@ -13,7 +13,7 @@ use ExtUtils::Helpers 0.007 qw/split_like_shell detildefy make_executable/;
 use ExtUtils::Manifest 'maniread';
 use File::Spec::Functions 'catfile';
 use Getopt::Long qw/GetOptionsFromArray/;
-use JSON::PP 2 qw/encode_json decode_json/;
+use Parse::CPAN::Meta;
 
 sub load_meta {
 	my @files = @_;
@@ -49,9 +49,12 @@ sub read_file {
 	return $ret;
 }
 
+my $json_backend = Parse::CPAN::Meta->json_backend;
+my $json = $json_backend->new->canonical->pretty->utf8;
+
 sub load_json {
 	my $filename = shift;
-	return JSON::PP->new->utf8->decode(read_file($filename));
+	return $json->decode(read_file($filename));
 }
 
 sub write_file {
@@ -65,7 +68,7 @@ sub write_file {
 
 sub save_json {
 	my ($filename, $content) = @_;
-	write_file($filename, JSON::PP->new->canonical->pretty->utf8->encode($content));
+	write_file($filename, $json->encode($content));
 	return;
 }
 
