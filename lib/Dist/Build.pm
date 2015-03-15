@@ -30,7 +30,7 @@ sub _modules_to_load {
 
 sub parse_arguments {
 	my ($args, $options) = @_;
-	my ($bpl, $env) = @{ decode_json(read_file([qw/_build params/])) };
+	my ($bpl, $env) = @{ load_json([qw/_build params/]) };
 	my $action = @{$args} && $args->[0] !~ / \A -- /xm ? shift @{$args} : 'build';
 	my %opt;
 	GetOptionsFromArray($_, \%opt, @{$options}) for $bpl, $env, $args;
@@ -49,6 +49,11 @@ sub read_file {
 	return $ret;
 }
 
+sub load_json {
+	my $filename = shift;
+	return JSON::PP->new->utf8->decode(read_file($filename));
+}
+
 sub write_file {
 	my ($filename, $content) = @_;
 	$filename = catfile(@{$filename}) if ref $filename;
@@ -58,12 +63,18 @@ sub write_file {
 	return;
 }
 
+sub save_json {
+	my ($filename, $content) = @_;
+	write_file($filename, JSON::PP->new->canonical->pretty->utf8->encode($content));
+	return;
+}
+
 sub Build {
 	my ($args, $env) = @_;
 	my $meta = load_meta('MYMETA.json', 'MYMETA.yml');
 
 	my @options  = qw/config=s% verbose:1 jobs=i install_base=s install_path=s% installdirs=s destdir=s prefix=s/;
-	my $pregraph = decode_json(read_file([qw/_build graph/]));
+	my $pregraph = load_json([qw/_build graph/]);
 	my $graph = Build::Graph->load($pregraph);
 	$graph->add_plugin_handler(sub {
 		my ($module) = @_;
@@ -99,9 +110,9 @@ sub Build_PL {
 	$graph->match(sort keys %{ maniread() });
 
 	mkdir '_build' if not -d '_build';
-	write_file([qw/_build graph/], JSON::PP->new->canonical->pretty->encode($graph->to_hashref));
+	save_json([qw/_build graph/], $graph->to_hashref);
 	my @env = defined $env->{PERL_MB_OPT} ? split_like_shell($env->{PERL_MB_OPT}) : ();
-	write_file([qw/_build params/], encode_json([ $args, \@env ]));
+	save_json([qw/_build params/], [ $args, \@env ]);
 
 	if (@meta_pieces) {
 		require CPAN::Meta::Merge;
