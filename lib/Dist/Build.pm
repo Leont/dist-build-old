@@ -28,18 +28,6 @@ sub _modules_to_load {
 	return @modules;
 }
 
-sub parse_arguments {
-	my ($args, $options) = @_;
-	my ($bpl, $env) = @{ load_json([qw/_build params/]) };
-	my $action = @{$args} && $args->[0] !~ / \A -- /xm ? shift @{$args} : 'build';
-	my %opt;
-	GetOptionsFromArray($_, \%opt, @{$options}) for $bpl, $env, $args;
-	$_ = detildefy($_) for grep { defined } @opt{qw/install_base destdir prefix/}, values %{ $opt{install_path} };
-	require ExtUtils::Config;
-	$opt{config} = ExtUtils::Config->new($opt{config});
-	return ($action, \%opt);
-}
-
 sub read_file {
 	my $filename = shift;
 	$filename = catfile(@{$filename}) if ref $filename;
@@ -84,12 +72,18 @@ sub Build {
 		push @options, $module->options;
 	});
 
-	my ($action, $options) = parse_arguments($args, \@options);
+	my $action = @{$args} && $args->[0] !~ / \A -- /xm ? shift @{$args} : 'build';
+	my ($bpl, $mbopts) = @{ load_json([qw/_build params/]) };
+	my %options;
+	GetOptionsFromArray($_, \%options, @options) for $bpl, $mbopts, $args;
+	$_ = detildefy($_) for grep { defined } @options{qw/install_base destdir prefix/}, values %{ $options{install_path} };
 
+	require ExtUtils::Config;
+	$options{config} = ExtUtils::Config->new($options{config});
 	require ExtUtils::InstallPaths;
-	$options->{install_paths} = ExtUtils::InstallPaths->new(%{$options}, dist_name => $meta->name);
+	$options{install_paths} = ExtUtils::InstallPaths->new(%options, dist_name => $meta->name);
 
-	return $graph->run($action, %{$options}, meta => $meta);
+	return $graph->run($action, %options, meta => $meta);
 }
 
 sub Build_PL {
