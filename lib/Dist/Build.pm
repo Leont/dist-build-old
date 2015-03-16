@@ -24,10 +24,6 @@ sub load_meta {
 #XXX: hardcoded for now.
 my @modules = qw/Core CopyPM TAP Install DistShare/;
 
-sub _modules_to_load {
-	return @modules;
-}
-
 sub read_file {
 	my $filename = shift;
 	$filename = catfile(@{$filename}) if ref $filename;
@@ -66,9 +62,8 @@ sub Build {
 
 	my @options  = qw/config=s% verbose:1 jobs=i install_base=s install_path=s% installdirs=s destdir=s prefix=s/;
 	my $pregraph = load_json([qw/_build graph/]);
-	my $graph = Build::Graph->load($pregraph);
-	$graph->add_plugin_handler(sub {
-		my ($module) = @_;
+	my $graph = Build::Graph->load($pregraph, sub {
+		my $module = shift;
 		push @options, $module->options;
 	});
 
@@ -98,12 +93,11 @@ sub Build_PL {
 
 	my @meta_pieces;
 	my $graph = Build::Graph->new;
-	$graph->add_plugin_handler(sub {
-		my ($module) = @_;
-		$module->manipulate_graph($graph, $meta);
-		push @meta_pieces, $module->meta_merge;
-	});
-	$graph->load_plugin($_, "Dist::Build::Plugin::$_") for _modules_to_load();
+	for my $plugin_name (@modules) {
+		my $plugin = $graph->load_plugin("Dist::Build::Plugin::$plugin_name") ;
+		$plugin->manipulate_graph($graph, $meta);
+		push @meta_pieces, $plugin->meta_merge;
+	}
 	$graph->match(sort keys %{ maniread() });
 
 	mkdir '_build' if not -d '_build';
