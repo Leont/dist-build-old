@@ -62,7 +62,7 @@ sub get_commands {
 	};
 }
 
-sub get_substs {
+sub get_trans {
 	return {
 		'to-blib' => sub {
 			my $path = shift;

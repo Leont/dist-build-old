@@ -28,14 +28,14 @@ sub manipulate_graph {
 
 	$graph->add_wildcard('pm-files', dir => 'lib', pattern => '*.{pm,pod}');
 	$graph->add_subst('pm-blib', 'pm-files',
-		subst  => [ 'Core/to-blib', '$(source)' ],
+		trans  => [ 'Core/to-blib', '$(source)' ],
 		action => [ 'Core/copy', '%(verbose)', '$(source)', '$(target)' ],
 	);
 	$graph->add_phony('copy_pm', dependencies => ['@(pm-blib)'], add_to => 'build-elements');
 
 	$graph->add_wildcard('pl-files', dir => 'script', pattern => '*');
 	$graph->add_subst('pl-blib', 'pl-files',
-		subst  => [ 'Core/to-blib', '$(source)' ],
+		trans  => [ 'Core/to-blib', '$(source)' ],
 		action => [ 'CopyPM/pl_to_blib', '%(verbose)', '$(source)', '$(target)' ],
 	);
 	$graph->add_phony('copy_pl', dependencies => ['@(pl-blib)'], add_to => 'build-elements');
