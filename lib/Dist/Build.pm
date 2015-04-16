@@ -12,7 +12,7 @@ use CPAN::Meta;
 use ExtUtils::Helpers 0.007 qw/split_like_shell detildefy make_executable/;
 use ExtUtils::Manifest 'maniread';
 use File::Spec::Functions 'catfile';
-use Getopt::Long qw/GetOptionsFromArray/;
+use Getopt::Long 2.36 qw/GetOptionsFromArray/;
 use Parse::CPAN::Meta;
 
 sub load_meta {
@@ -67,10 +67,10 @@ sub Build {
 		push @options, $module->options;
 	});
 
-	my $action = @{$args} && $args->[0] !~ / \A -- /xm ? shift @{$args} : 'build';
 	my ($bpl, $mbopts) = @{ load_json([qw/_build params/]) };
 	my %options;
 	GetOptionsFromArray($_, \%options, @options) for $bpl, $mbopts, $args;
+	my $action = @{$args} ? shift @{$args} : 'build';
 	$_ = detildefy($_) for grep { defined } @options{qw/install_base destdir prefix/}, values %{ $options{install_path} };
 
 	require ExtUtils::Config;
