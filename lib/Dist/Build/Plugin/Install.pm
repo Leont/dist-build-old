@@ -17,8 +17,8 @@ sub get_commands {
 }
 
 sub manipulate_graph {
-	my ($self, $graph) = @_;
-	$graph->add_phony('install', action => [ 'Install/install', '%(install_paths,verbose,uninst)' ], dependencies => ['build']);
+	my ($self) = @_;
+	$self->add_phony('install', action => [ 'install', '%(install_paths,verbose,uninst)' ], dependencies => ['build']);
 	return;
 }
 

@@ -72,17 +72,17 @@ sub get_trans {
 }
 
 sub manipulate_graph {
-	my ($self, $graph) = @_;
+	my $self = shift;
 	my @exists = map { File::Spec->catdir('blib', $_, '.exists') } qw/lib arch script/;
-	$graph->add_file($_, action => [ 'Core/touch', '%(verbose)', '$(target)' ]) for @exists;
-	$graph->add_variable('exist-files', @exists);
-	$graph->add_phony('config', dependencies => [ '@(exist-files)' ]);
-	$graph->add_variable('build-elements', 'config');
-	$graph->add_phony('build', dependencies => [ '@(build-elements)' ]);
-	$graph->add_variable('clean-files', 'blib');
-	$graph->add_phony('clean', action => [ 'Core/rm-r', '%(verbose)', '@(clean-files)']);
-	$graph->add_variable('realclean-files', qw/MYMETA.json MYMETA.yml Build _build/);
-	$graph->add_phony('realclean', action => [ 'Core/rm-r', '%(verbose)', '@(realclean-files)'], dependencies => [ 'clean']);
+	$self->add_file($_, action => [ 'touch', '%(verbose)', '$(target)' ]) for @exists;
+	$self->add_variable('exist-files', @exists);
+	$self->add_phony('config', dependencies => [ '@(exist-files)' ]);
+	$self->add_variable('build-elements', 'config');
+	$self->add_phony('build', dependencies => [ '@(build-elements)' ]);
+	$self->add_variable('clean-files', 'blib');
+	$self->add_phony('clean', action => [ 'rm-r', '%(verbose)', '@(clean-files)']);
+	$self->add_variable('realclean-files', qw/MYMETA.json MYMETA.yml Build _build/);
+	$self->add_phony('realclean', action => [ 'rm-r', '%(verbose)', '@(realclean-files)'], dependencies => [ 'clean']);
 	return;
 }
 

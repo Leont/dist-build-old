@@ -17,14 +17,14 @@ sub get_trans {
 }
 
 sub manipulate_graph {
-	my ($self, $graph, $meta) = @_;
+	my ($self, $meta) = @_;
 
-	$graph->add_wildcard('dist-share-source', dir => 'share', pattern => '*');
-	$graph->add_subst('dist-share', 'dist-share-source',
-		trans  => [ 'DistShare/to-share', '$(source)', $meta->name ],
+	$self->add_wildcard('dist-share-source', dir => 'share', pattern => '*');
+	$self->add_subst('dist-share', 'dist-share-source',
+		trans  => [ 'to-share', '$(source)', $meta->name ],
 		action => [ 'Core/copy', '%(verbose)', '$(source)', '$(target)' ],
 	);
-	$graph->add_phony('distshare', dependencies => ['@(dist-share)'], add_to => 'build-elements');
+	$self->add_phony('distshare', dependencies => ['@(dist-share)'], add_to => 'build-elements');
 
 	return;
 }

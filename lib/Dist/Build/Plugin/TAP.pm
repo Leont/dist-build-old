@@ -27,12 +27,12 @@ sub get_commands {
 }
 
 sub manipulate_graph {
-	my ($self, $graph) = @_;
+	my $self = shift;
 
 	my $name = $self->name;
-	$graph->add_wildcard('test-files', dir => 't', pattern => '*.t');
-	$graph->add_phony('test',
-		action       => [ 'TAP/tap-harness', '%(verbose,jobs)', '@(test-files)' ],
+	$self->add_wildcard('test-files', dir => 't', pattern => '*.t');
+	$self->add_phony('test',
+		action       => [ 'tap-harness', '%(verbose,jobs)', '@(test-files)' ],
 		dependencies => [ 'build', '@(test-files)' ]
 	);
 	return;
