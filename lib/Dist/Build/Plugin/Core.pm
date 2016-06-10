@@ -12,7 +12,7 @@ sub get_commands {
 		'copy' => sub {
 			my ($args, $source, $target) = @_;
 
-			if (-f $target) {
+			if (-e $target) {
 				require File::Path;
 				File::Path::rmtree($target, $args->{verbose}, 0);
 			}
@@ -81,8 +81,8 @@ sub manipulate_graph {
 	$self->add_phony('build', dependencies => [ '@(build-elements)' ]);
 	$self->add_variable('clean-files', 'blib');
 	$self->add_phony('clean', action => [ 'rm-r', '%(verbose)', '@(clean-files)']);
-	$self->add_variable('realclean-files', qw/MYMETA.json MYMETA.yml Build _build/);
-	$self->add_phony('realclean', action => [ 'rm-r', '%(verbose)', '@(realclean-files)'], dependencies => [ 'clean']);
+	$self->add_variable('realclean-files', qw/@(clean-files) MYMETA.json MYMETA.yml Build _build/);
+	$self->add_phony('realclean', action => [ 'rm-r', '%(verbose)', '@(realclean-files)']);
 	return;
 }
 
