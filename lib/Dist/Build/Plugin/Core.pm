@@ -3,7 +3,7 @@ package Dist::Build::Plugin::Core;
 use strict;
 use warnings;
 
-use parent qw/Dist::Build::Role::Plugin/;
+use base qw/Dist::Build::Role::Plugin/;
 
 use Carp;
 

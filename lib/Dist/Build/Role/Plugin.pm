@@ -3,7 +3,7 @@ package Dist::Build::Role::Plugin;
 use strict;
 use warnings;
 
-use parent qw/Build::Graph::Role::Plugin/;
+use base qw/Build::Graph::Role::Plugin/;
 
 use Scalar::Util ();
 

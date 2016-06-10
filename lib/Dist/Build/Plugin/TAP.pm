@@ -3,7 +3,7 @@ package Dist::Build::Plugin::TAP;
 use strict;
 use warnings;
 
-use parent qw/Dist::Build::Role::Plugin/;
+use base qw/Dist::Build::Role::Plugin/;
 
 use Carp;
 use File::Spec::Functions qw/catdir rel2abs/;
