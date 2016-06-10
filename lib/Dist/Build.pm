@@ -22,7 +22,7 @@ sub load_meta {
 }
 
 #XXX: hardcoded for now.
-my @modules = qw/Core CopyPM TAP Install DistShare/;
+my @modules = qw/Core CopyPM TAP DistShare/;
 
 sub read_file {
 	my $filename = shift;

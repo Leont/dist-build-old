@@ -59,6 +59,12 @@ sub get_commands {
 			open my $fh, '>', $target or croak "Could not create $target: $!";
 			close $fh or croak "Could not create $target: $!";
 		},
+		'install' => sub {
+			my $args = shift;
+			require ExtUtils::Install;
+			ExtUtils::Install::install($args->{install_paths}->install_map, $args->{verbose}, 0, $args->{uninst});
+			return;
+		},
 	};
 }
 
@@ -83,9 +89,14 @@ sub manipulate_graph {
 	$self->add_phony('clean', action => [ 'rm-r', '%(verbose)', '@(clean-files)']);
 	$self->add_variable('realclean-files', qw/@(clean-files) MYMETA.json MYMETA.yml Build _build/);
 	$self->add_phony('realclean', action => [ 'rm-r', '%(verbose)', '@(realclean-files)']);
+	$self->add_phony('install', action => [ 'install', '%(install_paths,verbose,uninst)' ], dependencies => ['build']);
 	return;
+}
+
+sub options {
+	return qw/uninst:1 dry_run:1/;
 }
 
 1;
 
-# ABSTRACT: Plugin implemented the bare neceseties of any module build process
+# ABSTRACT: Plugin implemented the bare necessities of any distribution build process
