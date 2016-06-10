@@ -80,10 +80,8 @@ sub get_trans {
 sub manipulate_graph {
 	my $self = shift;
 	my @exists = map { File::Spec->catdir('blib', $_, '.exists') } qw/lib arch script/;
-	$self->add_file($_, action => [ 'touch', '%(verbose)', '$(target)' ]) for @exists;
-	$self->add_variable('exist-files', @exists);
-	$self->add_phony('config', dependencies => [ '@(exist-files)' ]);
-	$self->add_variable('build-elements', 'config');
+	$self->add_file($_, action => [ 'touch', '%(verbose)', '$(target)' ], add_to => 'exist-files') for @exists;
+	$self->add_phony('config', dependencies => [ '@(exist-files)' ], add_to => 'build-elements');
 	$self->add_phony('build', dependencies => [ '@(build-elements)' ]);
 	$self->add_variable('clean-files', 'blib');
 	$self->add_phony('clean', action => [ 'rm-r', '%(verbose)', '@(clean-files)']);
