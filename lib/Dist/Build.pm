@@ -98,7 +98,7 @@ sub Build_PL {
 		$plugin->manipulate_graph($meta);
 		push @meta_pieces, $plugin->meta_merge;
 	}
-	$graph->match(sort keys %{ maniread() });
+	$graph->add_file($_) for sort keys %{ maniread() };
 
 	mkdir '_build' if not -d '_build';
 	save_json([qw/_build graph/], $graph->to_hashref);
