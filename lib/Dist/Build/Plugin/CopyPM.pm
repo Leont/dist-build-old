@@ -5,7 +5,7 @@ use warnings;
 
 use base qw/Dist::Build::Role::Plugin/;
 
-sub get_commands {
+sub get_actions {
 	my ($self, %args) = @_;
 	return {
 		make_executable => sub {

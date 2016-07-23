@@ -94,7 +94,7 @@ sub Build_PL {
 	my @meta_pieces;
 	my $graph = Build::Graph->new;
 	for my $plugin_name (@modules) {
-		my $plugin = $graph->load_plugin("Dist::Build::Plugin::$plugin_name") ;
+		my $plugin = $graph->load_commands("Dist::Build::Plugin::$plugin_name") ;
 		$plugin->manipulate_graph($meta);
 		push @meta_pieces, $plugin->meta_merge;
 	}

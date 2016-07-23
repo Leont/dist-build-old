@@ -3,7 +3,7 @@ package Dist::Build::Role::Plugin;
 use strict;
 use warnings;
 
-use base qw/Build::Graph::Role::Plugin/;
+use base qw/Build::Graph::Role::CommandSet/;
 
 use Scalar::Util ();
 
@@ -16,12 +16,12 @@ sub new {
 
 sub manipulate_graph;
 
-sub get_command {
+sub get_action {
 	my ($self, $name) = @_;
-	return $self->get_commands->{$name} || Carp::croak("No such command $name in $self->{name}");
+	return $self->get_actions->{$name} || Carp::croak("No such command $name in $self->{name}");
 }
 
-sub get_commands {
+sub get_actions {
 	return {};
 }
 
@@ -37,7 +37,7 @@ sub get_trans {
 sub run_command {
 	my ($self, $command, @arguments) = @_;
 	my ($plugin, $subcommand) = $command =~ m{ ^ ([^/]+) / (.*) }x ? ($self->{graph}->lookup_plugin($1), $2) : ($self, $command);
-	return $plugin->get_command($subcommand)->(@arguments);
+	return $plugin->get_action($subcommand)->(@arguments);
 }
 
 sub run_trans {

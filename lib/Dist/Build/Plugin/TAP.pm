@@ -8,7 +8,7 @@ use base qw/Dist::Build::Role::Plugin/;
 use Carp;
 use File::Spec::Functions qw/catdir rel2abs/;
 
-sub get_commands {
+sub get_actions {
 	return {
 		'tap-harness' => sub {
 			my ($args, @files) = @_;

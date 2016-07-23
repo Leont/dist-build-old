@@ -7,7 +7,7 @@ use base qw/Dist::Build::Role::Plugin/;
 
 use Carp;
 
-sub get_commands {
+sub get_actions {
 	return {
 		'copy' => sub {
 			my ($args, $source, $target) = @_;
