@@ -93,9 +93,15 @@ sub Build_PL {
 
 	my @meta_pieces;
 	my $graph = Build::Graph->new;
+	$graph->load_commands('Dist::Build::CommandSet::Core');
+	my %commands_seen;
 	for my $plugin_name (@modules) {
-		my $plugin = $graph->load_commands("Dist::Build::Plugin::$plugin_name") ;
-		$plugin->manipulate_graph($meta);
+		my $file_name = "Dist/Build/Plugin/$plugin_name.pm";
+		require $file_name;
+		my $plugin = "Dist::Build::Plugin::$plugin_name"->new();
+		my @commandsets = $plugin->commandsets;
+		$graph->load_commands($_) for grep { !$commands_seen{$_}++ } @commandsets;
+		$plugin->manipulate_graph($graph, $meta);
 		push @meta_pieces, $plugin->meta_merge;
 	}
 	$graph->add_file($_) for sort keys %{ maniread() };

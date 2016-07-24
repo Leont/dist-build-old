@@ -5,89 +5,17 @@ use warnings;
 
 use base qw/Dist::Build::Role::Plugin/;
 
-use Carp;
-
-sub get_actions {
-	return {
-		'copy' => sub {
-			my ($args, $source, $target) = @_;
-
-			if (-e $target) {
-				require File::Path;
-				File::Path::rmtree($target, $args->{verbose}, 0);
-			}
-			else {
-				require File::Basename;
-				my $dirname = File::Basename::dirname($target);
-				if (!-d $dirname) {
-					require File::Path;
-					File::Path::mkpath($dirname, $args->{verbose});
-				}
-			}
-
-			require File::Copy;
-			File::Copy::copy($source, $target) or croak "Could not copy: $!";
-			printf "cp %s %s\n", $source, $target;
-
-			my ($atime, $mtime) = (stat $source)[8,9];
-			utime $atime, $mtime, $target;
-			chmod 0444, $target;
-
-			return;
-		},
-		'rm-r' => sub {
-			my ($args, @files) = @_;
-			require File::Path;
-			File::Path::rmtree(\@files, $args->{verbose}, 0);
-			return;
-		},
-		'mkdir' => sub {
-			my ($args, $target) = @_;
-			File::Path::mkpath($target, $args->{verbose});
-			return;
-		},
-		'touch' => sub {
-			my ($args, $target) = @_;
-
-			require File::Basename;
-			my $dirname = File::Basename::dirname($target);
-			if (!-d $dirname) {
-				require File::Path;
-				File::Path::mkpath($dirname, $args->{verbose});
-			}
-
-			open my $fh, '>', $target or croak "Could not create $target: $!";
-			close $fh or croak "Could not create $target: $!";
-		},
-		'install' => sub {
-			my $args = shift;
-			require ExtUtils::Install;
-			ExtUtils::Install::install($args->{install_paths}->install_map, $args->{verbose}, 0, $args->{uninst});
-			return;
-		},
-	};
-}
-
-sub get_trans {
-	return {
-		'to-blib' => sub {
-			my $path = shift;
-			return File::Spec->catfile('blib', $path);
-		},
-	};
-}
-
 sub manipulate_graph {
-	my $self = shift;
+	my ($self, $graph) = @_;
 	my @exists = map { File::Spec->catdir('blib', $_, '.exists') } qw/lib arch script man1 man3/;
-	$self->add_file($_, action => [ 'touch', '%(verbose)', '$(target)' ], add_to => 'exist-files') for @exists;
-	$self->add_phony('config', dependencies => [ '@(exist-files)' ], add_to => 'build-elements');
-	$self->add_phony('build', dependencies => [ '@(build-elements)' ]);
-	$self->add_variable('clean-files', 'blib');
-	$self->add_phony('clean', action => [ 'rm-r', '%(verbose)', '@(clean-files)']);
-	$self->add_variable('realclean-files', qw/@(clean-files) MYMETA.json MYMETA.yml Build _build/);
-	$self->add_phony('realclean', action => [ 'rm-r', '%(verbose)', '@(realclean-files)']);
-	$self->add_phony('install', action => [ 'install', '%(install_paths,verbose,uninst)' ], dependencies => ['build']);
+	$graph->add_file($_, action => [ 'Core/touch', '%(verbose)', '$(target)' ], add_to => 'exist-files') for @exists;
+	$graph->add_phony('config', dependencies => [ '@(exist-files)' ], add_to => 'build-elements');
+	$graph->add_phony('build', dependencies => [ '@(build-elements)' ]);
+	$graph->add_variable('clean-files', 'blib');
+	$graph->add_phony('clean', action => [ 'Core/rm-r', '%(verbose)', '@(clean-files)']);
+	$graph->add_variable('realclean-files', qw/@(clean-files) MYMETA.json MYMETA.yml Build _build/);
+	$graph->add_phony('realclean', action => [ 'Core/rm-r', '%(verbose)', '@(realclean-files)']);
+	$graph->add_phony('install', action => [ 'Core/install', '%(install_paths,verbose,uninst)' ], dependencies => ['build']);
 	return;
 }
 
