@@ -10,14 +10,14 @@ use File::Spec::Functions qw/catfile/;
 sub manipulate_graph {
 	my ($self, $graph) = @_;
 
-	$graph->add_wildcard('pm-files', dir => 'lib', pattern => '*.{pm,pod}');
+	$graph->add_pattern('pm-files', dir => 'lib', pattern => '*.{pm,pod}');
 	$graph->add_subst('pm-blib', 'pm-files',
 		trans  => [ 'Core/to-blib', '$(source)' ],
 		action => [ 'Core/copy', '%(verbose)', '$(source)', '$(out)' ],
 	);
 	$graph->add_phony('copy_pm', dependencies => ['@(pm-blib)'], add_to => 'build-elements');
 
-	$graph->add_wildcard('pl-files', dir => 'script', pattern => '*');
+	$graph->add_pattern('pl-files', dir => 'script', pattern => '*');
 	$graph->add_subst('pl-blib', 'pl-files',
 		trans  => [ 'Core/to-blib', '$(source)' ],
 		action_list => [

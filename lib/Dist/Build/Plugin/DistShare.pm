@@ -8,7 +8,7 @@ use base qw/Dist::Build::Role::Plugin/;
 sub manipulate_graph {
 	my ($self, $graph, $meta) = @_;
 
-	$graph->add_wildcard('dist-share-source', dir => 'share', pattern => '*');
+	$graph->add_pattern('dist-share-source', dir => 'share', pattern => '*');
 	$graph->add_subst('dist-share', 'dist-share-source',
 		trans  => [ 'Core/to-distshare', '$(source)', $meta->name ],
 		action => [ 'Core/copy', '%(verbose)', '$(source)', '$(target)' ],
