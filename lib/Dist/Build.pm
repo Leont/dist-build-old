@@ -94,7 +94,7 @@ sub Build_PL {
 	my @meta_pieces;
 	my $graph = Build::Graph->new;
 	$graph->load_commands('Dist::Build::CommandSet::Core');
-	my %commands_seen;
+	my %commands_seen = ('Dist::Build::CommandSet::Core' => 1);
 	for my $plugin_name (@modules) {
 		my $file_name = "Dist/Build/Plugin/$plugin_name.pm";
 		require $file_name;

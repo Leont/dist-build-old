@@ -13,25 +13,28 @@ sub manipulate_graph {
 	$graph->add_wildcard('pm-files', dir => 'lib', pattern => '*.{pm,pod}');
 	$graph->add_subst('pm-blib', 'pm-files',
 		trans  => [ 'Core/to-blib', '$(source)' ],
-		action => [ 'Core/copy', '%(verbose)', '$(source)', '$(target)' ],
+		action => [ 'Core/copy', '%(verbose)', '$(source)', '$(out)' ],
 	);
 	$graph->add_phony('copy_pm', dependencies => ['@(pm-blib)'], add_to => 'build-elements');
 
 	$graph->add_wildcard('pl-files', dir => 'script', pattern => '*');
 	$graph->add_subst('pl-blib', 'pl-files',
 		trans  => [ 'Core/to-blib', '$(source)' ],
-		action => [ 'Core/pl_to_blib', '%(verbose)', '$(source)', '$(target)' ],
+		action_list => [
+			[ 'Core/copy', '%(verbose)', '$(source)', '$(target)' ],
+			[ 'Core/make_executable', '%(verbose)', '$(target)' ],
+		],
 	);
 	$graph->add_phony('copy_pl', dependencies => ['@(pl-blib)'], add_to => 'build-elements');
 
 	$graph->add_subst('man3-pages', 'pm-files',
 		trans  => [ 'Core/man3_filepath', '$(source)' ],
-		action => [ 'Core/manify', '%(verbose)', '$(source)', '$(target)', ],
+		action => [ 'Core/manify', '%(verbose)', '$(source)', '$(out)', ],
 		dependencies => [ catfile(qw/blib man3 .exists/) ],
 	);
 	$graph->add_subst('man1-pages', 'pl-files',
 		trans  => [ 'Core/man1_filepath', '$(source)' ],
-		action => [ 'Core/manify', { verbose => '$(verbose?)', section => 1 }, '$(source)', '$(target)' ],
+		action => [ 'Core/manify', { verbose => '$(verbose?)', section => 1 }, '$(source)', '$(out)' ],
 		dependencies => [ catfile(qw/blib man1 .exists/) ],
 	);
 	$graph->add_phony('manify-pods', dependencies => [ '@(man1-pages)', '@(man3-pages)' ], add_to => 'build-elements');

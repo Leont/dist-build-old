@@ -15,26 +15,13 @@ sub get_actions {
 		'copy' => sub {
 			my ($args, $source, $target) = @_;
 
-			if (-e $target) {
-				require File::Path;
-				File::Path::rmtree($target, $args->{verbose}, 0);
-			}
-			else {
-				require File::Basename;
-				my $dirname = File::Basename::dirname($target);
-				if (!-d $dirname) {
-					require File::Path;
-					File::Path::mkpath($dirname, $args->{verbose});
-				}
-			}
-
 			require File::Copy;
 			File::Copy::copy($source, $target) or croak "Could not copy: $!";
 			printf "cp %s %s\n", $source, $target;
 
 			my ($atime, $mtime) = (stat $source)[8,9];
 			utime $atime, $mtime, $target;
-			chmod 0444, $target;
+			chmod 0444 & ~umask, $target;
 
 			return;
 		},
@@ -52,20 +39,13 @@ sub get_actions {
 		'touch' => sub {
 			my ($args, $target) = @_;
 
-			require File::Basename;
-			my $dirname = File::Basename::dirname($target);
-			if (!-d $dirname) {
-				require File::Path;
-				File::Path::mkpath($dirname, $args->{verbose});
-			}
-
 			open my $fh, '>', $target or croak "Could not create $target: $!";
 			close $fh or croak "Could not create $target: $!";
 		},
 		make_executable => sub {
-			my ($args, $target) = @_;
+			my ($args, $out, $target) = @_;
 			require ExtUtils::Helpers;
-			ExtUtils::Helpers::make_executable($target);
+			ExtUtils::Helpers::make_executable($out, $target);
 		},
 		manify => sub {
 			my ($opts, $input_file, $output_file) = @_;
