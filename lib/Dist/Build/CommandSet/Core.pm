@@ -3,14 +3,16 @@ package Dist::Build::CommandSet::Core;
 use strict;
 use warnings;
 
-use base 'Dist::Build::Role::CommandSet';
+use base 'Build::Graph::Role::CommandSet';
 
 use Carp qw/croak carp/;
 use ExtUtils::Helpers qw/man1_pagename man3_pagename/;
 use File::Spec::Functions qw/catfile catdir abs2rel rel2abs/;
 
-sub get_actions {
-	my ($self, $graph) = @_;
+sub new {
+	my ($class, @args) = @_;
+	my $self = $class->SUPER::new(@args);
+
 	my %commands = (
 		'copy' => sub {
 			my ($args, $source, $target) = @_;
@@ -75,22 +77,12 @@ sub get_actions {
 			return;
 		},
 	);
-	$commands{pl_to_blib} = sub {
-		my ($opts, $source, $target) = @_;
-		$commands{copy}->($opts, $source, $target);
-		$commands{make_executable}->($opts, $target);
-		return;
-	};
-	return \%commands;
-}
 
-sub has_action {
-	my ($self, $name) = @_;
-	return !!$self->get_actions->{$name};
-}
+	for my $key (keys %commands) {
+		$self->{graph}->add_action($key, $commands{$key});
+	}
 
-sub get_trans {
-	return {
+	my %transformations = (
 		'to-blib' => sub {
 			my $path = shift;
 			return File::Spec->catfile('blib', $path);
@@ -107,7 +99,13 @@ sub get_trans {
 			my $pl_file = shift;
 			return catfile(qw/blib man3/, man3_pagename($pl_file));
 		},
-	};
+	);
+
+	for my $key (keys %transformations) {
+		$self->{graph}->add_transformation($key, $transformations{$key});
+	}
+
+	return $self;
 }
 
 1;
