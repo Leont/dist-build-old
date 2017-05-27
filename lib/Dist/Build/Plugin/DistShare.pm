@@ -10,10 +10,10 @@ sub manipulate_graph {
 
 	$graph->add_pattern('dist-share-source', dir => 'share', pattern => '*');
 	$graph->add_subst('dist-share', 'dist-share-source',
-		trans  => [ 'to-distshare', '$(source)', $meta->name ],
-		action => [ 'copy', '%(verbose)', '$(source)', '$(target)' ],
+		trans  => [ 'to-distshare', '$source', $meta->name ],
+		action => [ 'copy', '%verbose', '$source', '$target' ],
 	);
-	$graph->add_phony('distshare', dependencies => ['@(dist-share)'], add_to => 'build-elements');
+	$graph->add_phony('distshare', dependencies => ['@dist-share'], add_to => 'build-elements');
 
 	return;
 }
