@@ -49,7 +49,7 @@ sub new {
 	);
 
 	for my $key (keys %commands) {
-		$self->{graph}->add_action($key, $commands{$key});
+		$self->{graph}->actions->add($key, $commands{$key});
 	}
 
 	my %transformations = (
@@ -72,7 +72,7 @@ sub new {
 	);
 
 	for my $key (keys %transformations) {
-		$self->{graph}->add_transformation($key, $transformations{$key});
+		$self->{graph}->transformations->add($key, $transformations{$key});
 	}
 
 	return $self;
