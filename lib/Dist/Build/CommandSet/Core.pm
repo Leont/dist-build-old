@@ -63,11 +63,11 @@ sub new {
 		},
 		man1_filepath => sub {
 			my $pm_file = shift;
-			return catfile(qw/blib man3/, man1_pagename($pm_file));
+			return catfile(qw/blib bindoc/, man1_pagename($pm_file));
 		},
 		man3_filepath => sub {
 			my $pl_file = shift;
-			return catfile(qw/blib man3/, man3_pagename($pl_file));
+			return catfile(qw/blib libdoc/, man3_pagename($pl_file));
 		},
 	);
 
