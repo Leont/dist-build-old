@@ -78,7 +78,7 @@ sub Build {
 	require ExtUtils::InstallPaths;
 	$options{install_paths} = ExtUtils::InstallPaths->new(%options, dist_name => $meta->name);
 
-	return $graph->run($action, %options, meta => $meta);
+	return $graph->run($action, %options);
 }
 
 sub Build_PL {
@@ -93,6 +93,7 @@ sub Build_PL {
 
 	my @meta_pieces;
 	my $graph = Build::Graph->new;
+	$graph->add_variable('dist-name', $meta->name);
 	my %modules_seen;
 	for my $module (qw/Build::Graph::CommandSet::Prelude Dist::Build::CommandSet::Core/) {
 		$graph->load_commands($module);

@@ -57,9 +57,13 @@ sub new {
 			my $path = shift;
 			return File::Spec->catfile('blib', $path);
 		},
-		'to-distshare' => sub {
-			my ($source, $distname) = @_;
-			return catfile(qw/blib lib auto share dist/, $distname, abs2rel($source, 'share'));
+		'abs2rel' => sub {
+			my ($source, $base) = @_;
+			return abs2rel($source, $base);
+		},
+		'prepend-dirs' => sub {
+			my @parts = @_;
+			return catfile(@parts);
 		},
 		man1_filepath => sub {
 			my $pm_file = shift;
