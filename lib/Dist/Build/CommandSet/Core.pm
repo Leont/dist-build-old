@@ -3,15 +3,12 @@ package Dist::Build::CommandSet::Core;
 use strict;
 use warnings;
 
-use base 'Build::Graph::Role::CommandSet';
-
 use Carp qw/croak carp/;
 use ExtUtils::Helpers qw/man1_pagename man3_pagename/;
 use File::Spec::Functions qw/catfile catdir abs2rel rel2abs/;
 
-sub new {
-	my ($class, @args) = @_;
-	my $self = $class->SUPER::new(@args);
+sub add_to {
+	my ($class, $graph, %args) = @_;
 
 	my %commands = (
 		make_executable => sub {
@@ -49,7 +46,7 @@ sub new {
 	);
 
 	for my $key (keys %commands) {
-		$self->{graph}->actions->add($key, $commands{$key});
+		$graph->actions->add($key, $commands{$key});
 	}
 
 	my %transformations = (
@@ -76,10 +73,10 @@ sub new {
 	);
 
 	for my $key (keys %transformations) {
-		$self->{graph}->transformations->add($key, $transformations{$key});
+		$graph->transformations->add($key, $transformations{$key});
 	}
 
-	return $self;
+	return;
 }
 
 1;
