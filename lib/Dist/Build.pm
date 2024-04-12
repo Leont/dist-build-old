@@ -37,7 +37,7 @@ sub save_json {
 	return;
 }
 
-my @options = qw/install_base=s install_path=s% installdirs=s destdir=s prefix=s config=s% uninst:1 verbose:1 dry_run:1 create_packlist=i jobs=i/;
+my @options = qw/install_base=s install_path=s% installdirs=s destdir=s prefix=s config=s% uninst:1 verbose:1 dry_run:1 pureperl_only|pureperl-only:1 create_packlist=i jobs=i/;
 
 sub get_config {
 	my ($meta_name, @arguments) = @_;
@@ -119,7 +119,8 @@ sub Build_PL {
 	$planner->mkdirs('config', map { catfile('blib', $_) } qw/lib arch bindoc libdoc script bin/);
 	$planner->create_phony('code', 'config', values %most, values %scripts);
 	$planner->create_phony('manify', 'config', values %man1, values %man3);
-	$planner->create_phony('pure_all', 'code', 'manify');
+	$planner->create_phony('dynamic');
+	$planner->create_phony('pure_all', 'code', 'manify', 'dynamic');
 	$planner->create_phony('build', 'pure_all');
 
 	$planner->tap_harness('test', dependencies => [ 'pure_all' ], test_files => [ find(qr/\.t$/, 't')]);
@@ -131,7 +132,7 @@ sub Build_PL {
 	$planner->add_delegate('release_status', sub { $meta->release_status });
 	$planner->add_delegate('perl_path', sub { get_perl(%options) });
 
-	for my $variable (qw/config install_paths verbose uninst jobs/) {
+	for my $variable (qw/config install_paths verbose uninst jobs pureperl_only/) {
 		$planner->add_delegate($variable, sub { $options{$variable} });
 	}
 
@@ -181,4 +182,10 @@ sub Build {
 
 =head1 DESCRIPTION
 
-C<Dist::Build> is a Build.PL implementation. Unlike L<Module::Build::Tiny> it is extensible, unlike L<Module::Build> it uses a build graph internally which makes it easy to combine different customizations. It's typically extended by adding a C<.pl> script in C<planner/>.
+C<Dist::Build> is a Build.PL implementation. Unlike L<Module::Build::Tiny> it is extensible, unlike L<Module::Build> it uses a build graph internally which makes it easy to combine different customizations. It's typically extended by adding a C<.pl> script in C<planner/>. E.g.
+
+ load_module("Dist::Build::XS");
+ add_xs(
+   libraries     => [ 'foo' ],
+   extra_sources => [ glob 'src/*.c' ],
+ );

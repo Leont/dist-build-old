@@ -8,6 +8,7 @@ use Test::More 0.88;
 use lib 't/lib';
 use DistGen qw/undent/;
 use XSLoader;
+use ExtUtils::HasCompiler 'can_compile_loadable_object';
 
 local $ENV{PERL_INSTALL_QUIET};
 local $ENV{PERL_MB_OPT};
@@ -25,6 +26,41 @@ $dist->add_file('script/simple', undent(<<'    ---'));
     use Foo::Bar;
     print Foo::Bar->VERSION . "\n";
     ---
+
+my $has_compiler = can_compile_loadable_object(quiet => 1);
+
+if ($has_compiler) {
+	$dist->add_file('lib/Foo/Bar.xs', undent(<<'		---'));
+		#define PERL_NO_GET_CONTEXT
+		#include "EXTERN.h"
+		#include "perl.h"
+		#include "XSUB.h"
+		#include "foo.h"
+
+		MODULE = Foo::Bar                PACKAGE = Foo::Bar
+
+		const char*
+		foo()
+			CODE:
+			RETVAL = foo();
+			OUTPUT:
+			RETVAL
+		---
+	$dist->add_file('include/foo.h', undent(<<'		---'));
+		char* foo();
+		---
+	$dist->add_file('src/foo.c', undent(<<'		---'));
+		char* foo() {
+			return "Hello World!\n";
+		}
+		---
+	$dist->add_file('planner/xs.pl', undent(<<'		---'));
+		load_module("Dist::Build::XS");
+		add_xs(
+			extra_sources => [ glob 'src/*.c' ],
+		);
+		---
+}
 
 $dist->regen;
 
@@ -115,6 +151,10 @@ sub _slurp { do { local (@ARGV,$/)=$_[0]; <> } }
   ok( -f catfile(qw/blib lib auto share dist Foo-Bar file.txt/), 'dist sharedir file has been made');
   ok( -d catdir(qw/blib lib auto share module Foo-Bar/), 'moduole sharedir has been made');
   ok( -f catfile(qw/blib lib auto share module Foo-Bar file.txt/), 'module sharedir file has been made');
+  if ($has_compiler) {
+    XSLoader::load('Foo::Bar');
+    is(Foo::Bar::foo(), "Hello World!\n", 'Can run XSub Foo::Bar::foo');
+  }
 
   SKIP: {
     require ExtUtils::InstallPaths;
@@ -128,8 +168,8 @@ sub _slurp { do { local (@ARGV,$/)=$_[0]; <> } }
 {
   ok( open2(my($in, $out), $^X, Build => 'install'), 'Could run Build install' );
   my $output = do { local $/; <$in> };
-  my $filename = catfile(qw/install lib perl5/, qw/Foo Bar.pm/);
-  like($output, qr/Installing \Q$filename/, 'Build install output looks correctly') or diag $output;
+  my $filename = catfile(qw/install lib perl5/, ($has_compiler? $Config{archname} : () ), qw/Foo Bar.pm/);
+  like($output, qr/Installing \Q$filename/, 'Build install output looks correctly');
 
   ok( -f $filename, 'Module is installed');
   ok( -f 'install/bin/simple', 'Script is installed');
