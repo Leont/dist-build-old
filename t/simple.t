@@ -31,6 +31,8 @@ $dist->add_file('planner/shared.pl', undent(<<'	---'));
 	dist_sharedir('share', 'Foo-Bar');
 	module_sharedir('module-share/Foo-Bar', 'Foo::Bar');
 	---
+$dist->add_file('dynamic-prereqs.json', undent(<<"	---"));
+	---
 
 my $has_compiler = can_compile_loadable_object(quiet => 1);
 
@@ -160,6 +162,13 @@ sub _slurp { do { local (@ARGV,$/)=$_[0]; <> } }
     XSLoader::load('Foo::Bar');
     is(Foo::Bar::foo(), "Hello World!\n", 'Can run XSub Foo::Bar::foo');
   }
+
+  require CPAN::Meta;
+  my $meta = CPAN::Meta->load_file("MYMETA.json");
+  my $req = $meta->effective_prereqs->requirements_for('runtime', 'requires');
+  my $dynamic_dependency = join ',', sort $req->required_modules;
+
+  is($dynamic_dependency, 'Bar,perl', 'Dependency on Foo has been inserted');
 
   SKIP: {
     require ExtUtils::InstallPaths;
