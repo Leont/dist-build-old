@@ -83,10 +83,8 @@ sub Build_PL {
 	my %docs    = map { $_ => catfile('blib', $_) } find(qr/\.pod$/, 'lib');
 	my %scripts = map { $_ => catfile('blib', $_) } find(qr/(?:)/, 'script');
 	my %sdocs   = map { $_ => delete $scripts{$_} } grep { /.pod$/ } keys %scripts;
-	my %dist_shared    = map { $_ => catfile(qw/blib lib auto share dist/, $meta->name, abs2rel($_, 'share')) } find(qr/(?:)/, 'share');
-	my %module_shared  = map { $_ => catfile(qw/blib lib auto share module/, abs2rel($_, 'module-share')) } find(qr/(?:)/, 'module-share');
 
-	my %most = (%modules, %docs, %sdocs, %dist_shared, %module_shared);
+	my %most = (%modules, %docs, %sdocs);
 
 	for my $source (keys %most) {
 		$planner->copy_file($source, $most{$source});
@@ -184,6 +182,9 @@ sub Build {
 
 C<Dist::Build> is a Build.PL implementation. Unlike L<Module::Build::Tiny> it is extensible, unlike L<Module::Build> it uses a build graph internally which makes it easy to combine different customizations. It's typically extended by adding a C<.pl> script in C<planner/>. E.g.
 
+ load_module("Dist::Build::ShareDir");
+ dist_sharedir('share', 'Foo-Bar');
+ 
  load_module("Dist::Build::XS");
  add_xs(
    libraries     => [ 'foo' ],

@@ -26,6 +26,11 @@ $dist->add_file('script/simple', undent(<<'    ---'));
     use Foo::Bar;
     print Foo::Bar->VERSION . "\n";
     ---
+$dist->add_file('planner/shared.pl', undent(<<'	---'));
+	load_module("Dist::Build::ShareDir");
+	dist_sharedir('share', 'Foo-Bar');
+	module_sharedir('module-share/Foo-Bar', 'Foo::Bar');
+	---
 
 my $has_compiler = can_compile_loadable_object(quiet => 1);
 
