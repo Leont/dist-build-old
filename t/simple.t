@@ -8,7 +8,7 @@ use Test::More 0.88;
 use lib 't/lib';
 use DistGen qw/undent/;
 use XSLoader;
-use ExtUtils::HasCompiler 'can_compile_loadable_object';
+use ExtUtils::HasCompiler 0.024 'can_compile_loadable_object';
 
 local $ENV{PERL_INSTALL_QUIET};
 local $ENV{PERL_MB_OPT};
