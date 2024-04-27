@@ -5,7 +5,7 @@ use warnings;
 
 use parent 'ExtUtils::Builder::Serializer';
 
-use List::Util 'any';
+use List::Util 1.33 'any';
 
 use ExtUtils::Builder::Action::Function;
 use Dist::Build::Core;
