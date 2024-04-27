@@ -1,6 +1,7 @@
 Revision history for Dist-Build
 
 {{$NEXT}}
+          - Allow extra compiler and linker flags to be a string
 
 0.002     2024-04-27 12:07:09+02:00 Europe/Brussels
           - Add dynamic prereqs
